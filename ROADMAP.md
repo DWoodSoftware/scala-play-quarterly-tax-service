@@ -101,11 +101,11 @@ A tax year must represent two consecutive years.
 
 Tasks:
 
-* [ ] Define expected valid and invalid tax-year behaviour
-* [ ] Add failing tests
-* [ ] Implement `TaxYear`
-* [ ] Prevent invalid year ranges where practical
-* [ ] Refactor construction API if tests reveal weak invariants
+* [x] Define expected valid and invalid tax-year behaviour
+* [x] Add failing tests
+* [x] Implement `TaxYear`
+* [x] Prevent invalid year ranges where practical
+* [x] Refactor construction API if tests reveal weak invariants
 
 Contract:
 
