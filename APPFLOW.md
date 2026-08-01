@@ -79,7 +79,7 @@ The initial intended state model is:
 
 ```text
                  ┌─────────────┐
-                 │    DRAFT    │
+                 │    Draft    │
                  └──────┬──────┘
                         │
                      validate
@@ -91,19 +91,19 @@ The initial intended state model is:
            succeeds            fails
                 │                │
                 ▼                ▼
-          ┌───────────┐    remains DRAFT
-          │ VALIDATED │    + errors returned
+          ┌───────────┐    remains Draft
+          │ Validated │    + errors returned
           └─────┬─────┘
                 │
               submit
                 │
                 ▼
           ┌───────────┐
-          │ SUBMITTED │
+          │ Submitted │
           └───────────┘
 ```
 
-`SUBMITTED` represents a terminal state for the initial implementation.
+`Submitted` represents a terminal state for the initial implementation.
 
 A submitted quarterly update cannot be modified or submitted again.
 
@@ -144,7 +144,7 @@ Domain Validator
 Calculate Derived Totals
   │
   ▼
-Create DRAFT Submission
+Create Draft Submission
   │
   ▼
 QuarterlyUpdateRepository
@@ -321,7 +321,7 @@ QuarterlyUpdateInput
      validate
        │
        ▼
-Either[List[ValidationError], ValidQuarterlyUpdate]
+Either[List[ValidationError], QuarterlyUpdateInput]
 ```
 
 A domain validation failure is an expected result.
@@ -354,7 +354,7 @@ Find Quarterly Update
        ▼
 Inspect Current State
        │
-       ├── SUBMITTED
+       ├── Submitted
        │      │
        │      ▼
        │   409 Conflict
@@ -369,7 +369,7 @@ Validate
        │
        ▼
 Transition
-DRAFT → VALIDATED → SUBMITTED
+Draft → Validated → Submitted
        │
        ▼
 Persist Updated State
@@ -391,18 +391,18 @@ The application should explicitly control state transitions.
 Initially permitted:
 
 ```text
-DRAFT → VALIDATED
-VALIDATED → SUBMITTED
+Draft → Validated
+Validated → Submitted
 ```
 
 Not permitted:
 
 ```text
-SUBMITTED → DRAFT
+Submitted → Draft
 
-SUBMITTED → VALIDATED
+Submitted → Validated
 
-SUBMITTED → SUBMITTED
+Submitted → Submitted
 ```
 
 Attempting an invalid transition should produce an explicit domain/application error.
