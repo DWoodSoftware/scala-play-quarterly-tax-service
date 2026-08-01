@@ -31,16 +31,22 @@ class QuarterlyUpdateInputSpec extends AnyWordSpec with Matchers {
                     case Right(value) => value
                     case Left(error) => fail(error)
                 }
+
+            val taxpayerReference = 
+                TaxpayerReference.create("TAX-12345678") match {
+                    case Right(value) => value
+                    case Left(error) => fail(error)
+                }
             
             val input = QuarterlyUpdateInput(
-                taxPayerReference = "TEST-12345",
+                taxpayerReference = taxpayerReference,
                 taxYear = taxYear,
                 quarter = Quarter.Q1,
                 income = List(incomeEntry),
                 expenses = List(expenseEntry)
             )
 
-            input.taxPayerReference shouldEqual "TEST-12345"
+            input.taxpayerReference shouldEqual taxpayerReference
             input.taxYear shouldEqual taxYear
             input.quarter shouldEqual Quarter.Q1
             input.income shouldEqual List(incomeEntry)
@@ -89,9 +95,15 @@ class QuarterlyUpdateInputSpec extends AnyWordSpec with Matchers {
                     case Right(value) => value
                     case Left(error) => fail(error)
                 }
+
+            val taxpayerReference = 
+                TaxpayerReference.create("TAX-12345678") match {
+                    case Right(value) => value
+                    case Left(error) => fail(error)
+                }
             
             val input = QuarterlyUpdateInput(
-                taxPayerReference = "TEST-12345",
+                taxpayerReference = taxpayerReference,
                 taxYear = taxYear,
                 quarter = Quarter.Q1,
                 income = List(selfEmployment, dividends),

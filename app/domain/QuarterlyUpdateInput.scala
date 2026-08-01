@@ -1,7 +1,7 @@
 package domain
 
 final case class QuarterlyUpdateInput(
-    taxPayerReference: String,
+    taxpayerReference: TaxpayerReference,
     taxYear: TaxYear,
     quarter: Quarter,
     income: List[IncomeEntry],
