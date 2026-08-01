@@ -1,318 +1,365 @@
-# Types and contracts
+# Types and Contracts
 
-This document is the canonical reference for the domain contracts and important Scala types used by this project. It focuses on the data shapes and architectural contracts that matter to engineers working on the service.
+This document is the canonical reference for the application's important Scala domain types and public contracts.
 
-## Status legend
+Detailed behaviour belongs in [APPFLOW.md](./APPFLOW.md).
+Implementation progress belongs in [ROADMAP.md](./ROADMAP.md).
 
-- Implemented: available in the current codebase.
-- Planned: intended for future implementation.
-- Deprecated: no longer part of the intended design.
+## Status
 
-## Current implementation
+* **Implemented** — exists in the current codebase.
+* **Planned** — designed but not yet implemented.
+* **Deprecated** — retained only for historical reference.
 
-The current codebase is intentionally minimal, so the implemented type surface is small. The project is already structured around the expectation that the domain layer will grow into richer contracts over time.
+---
 
-## Health response
+# Implemented
 
-Name: HealthResponse
+## HealthResponse
 
-Status: Implemented
-
-Purpose: A simple JSON response returned by the health endpoint.
-
-Scala shape:
+**Status:** Implemented
 
 ```scala
-final case class HealthResponse(status: String)
+final case class HealthResponse(
+  status: String
+)
 ```
 
-Field meanings:
+Represents the JSON payload returned by `GET /health`.
 
-- status: A string describing the service health state. In the current implementation it is always "UP".
+Current invariant:
 
-Invariants:
+```text
+status == "UP"
+```
 
-- The status value is a non-empty string.
-- In the current implementation, the value is always "UP".
+---
 
-Related types:
+# Domain Types
 
-- None
+## Quarter
 
-Notes:
-
-- This type exists to make the health endpoint response explicit and easy to document.
-- It is currently represented as a simple case class rather than a more complex sealed model because the behaviour is intentionally minimal.
-
-## Controller action contract
-
-Name: HealthController.health
-
-Status: Implemented
-
-Purpose: Exposes the current health check behaviour over HTTP.
-
-Scala shape:
+**Status:** Planned
 
 ```scala
-def health: Action[AnyContent]
+enum Quarter:
+  case Q1, Q2, Q3, Q4
 ```
 
-Field meanings:
+Represents a valid quarterly reporting period.
 
-- No input parameters are required.
+Using an enum prevents invalid quarter values from entering the domain.
 
-Invariants:
+---
 
-- The action always returns a successful HTTP response.
-- The response body contains JSON with a status field.
+## TaxYear
 
-Related types:
+**Status:** Planned
 
-- HealthResponse
+```scala
+final case class TaxYear(
+  startYear: Int,
+  endYear: Int
+)
+```
 
-Notes:
+Represents a reporting tax year.
 
-- This is an HTTP-facing contract rather than a domain contract.
-- It is intentionally simple and should remain thin as the application grows.
+Invariant:
 
-## Planned domain types
+```text
+endYear == startYear + 1
+```
 
-The following types are planned for future implementation and are not yet part of the codebase.
+---
 
-### QuarterlyUpdate
+## IncomeCategory
 
-Name: QuarterlyUpdate
+**Status:** Planned
 
-Status: Planned
+```scala
+enum IncomeCategory:
+  case SelfEmployment
+  case Property
+  case Other
+```
 
-Purpose: Represents a quarterly reporting submission or draft update for a fictional reporting period.
+Defines supported income classifications.
 
-Scala shape:
+---
+
+## ExpenseCategory
+
+**Status:** Planned
+
+```scala
+enum ExpenseCategory:
+  case Travel
+  case OfficeCosts
+  case ProfessionalFees
+  case Other
+```
+
+Defines supported expense classifications.
+
+---
+
+## IncomeEntry
+
+**Status:** Planned
+
+```scala
+final case class IncomeEntry(
+  category: IncomeCategory,
+  amount: BigDecimal
+)
+```
+
+Invariant:
+
+```text
+amount >= 0
+```
+
+---
+
+## ExpenseEntry
+
+**Status:** Planned
+
+```scala
+final case class ExpenseEntry(
+  category: ExpenseCategory,
+  amount: BigDecimal
+)
+```
+
+Invariant:
+
+```text
+amount >= 0
+```
+
+---
+
+## SubmissionStatus
+
+**Status:** Planned
+
+```scala
+enum SubmissionStatus:
+  case Draft
+  case Validated
+  case Submitted
+```
+
+Valid lifecycle:
+
+```text
+Draft → Validated → Submitted
+```
+
+`Submitted` is terminal in the initial implementation.
+
+---
+
+## QuarterlyUpdateInput
+
+**Status:** Planned
+
+```scala
+final case class QuarterlyUpdateInput(
+  taxpayerReference: String,
+  taxYear: TaxYear,
+  quarter: Quarter,
+  income: List[IncomeEntry],
+  expenses: List[ExpenseEntry]
+)
+```
+
+Represents client-supplied quarterly financial data before persistence.
+
+Derived totals are intentionally excluded from the input contract.
+
+---
+
+## QuarterlyUpdate
+
+**Status:** Planned
 
 ```scala
 final case class QuarterlyUpdate(
   id: String,
+  taxpayerReference: String,
+  taxYear: TaxYear,
   quarter: Quarter,
-  status: UpdateStatus,
-  submittedAt: Option[Instant],
-  payload: QuarterlyUpdatePayload
+  income: List[IncomeEntry],
+  expenses: List[ExpenseEntry],
+  totalIncome: BigDecimal,
+  totalExpenses: BigDecimal,
+  netAmount: BigDecimal,
+  status: SubmissionStatus,
+  submittedAt: Option[Instant]
 )
 ```
 
-Field meanings:
+Represents the persisted domain entity.
 
-- id: Unique identifier for the quarterly update.
-- quarter: The reporting period represented by the update.
-- status: The lifecycle state of the update.
-- submittedAt: The submission timestamp when the update has been submitted.
-- payload: The core reporting content for the update.
+Key invariants:
 
-Invariants:
-
-- The id must be unique within the repository.
-- The quarter must be a valid reporting period.
-- A submitted update must have a defined submittedAt value.
-- A draft update must not have a submittedAt value.
-
-Related types:
-
-- Quarter
-- UpdateStatus
-- QuarterlyUpdatePayload
-
-### Quarter
-
-Name: Quarter
-
-Status: Planned
-
-Purpose: Represents a reporting period.
-
-Scala shape:
-
-```scala
-sealed trait Quarter
+```text
+totalIncome   == sum(income.amount)
+totalExpenses == sum(expenses.amount)
+netAmount     == totalIncome - totalExpenses
 ```
 
-Field meanings:
+And:
 
-- A quarter is a strongly typed representation of a reporting period.
-
-Invariants:
-
-- Only valid reporting periods should be constructible.
-
-Related types:
-
-- QuarterlyUpdate
-
-### UpdateStatus
-
-Name: UpdateStatus
-
-Status: Planned
-
-Purpose: Represents the lifecycle state of a quarterly update.
-
-Scala shape:
-
-```scala
-sealed trait UpdateStatus
+```text
+status == Submitted  ⇒ submittedAt.isDefined
+status != Submitted  ⇒ submittedAt.isEmpty
 ```
 
-Field meanings:
+---
 
-- Draft: the update is still being prepared.
-- Submitted: the update has been submitted for processing.
+# Validation Types
 
-Invariants:
+## ValidationError
 
-- A transition must follow the intended lifecycle order.
-
-Related types:
-
-- QuarterlyUpdate
-
-### QuarterlyUpdatePayload
-
-Name: QuarterlyUpdatePayload
-
-Status: Planned
-
-Purpose: Contains the reporting values that belong to a quarterly update.
-
-Scala shape:
+**Status:** Planned
 
 ```scala
-final case class QuarterlyUpdatePayload(
-  periodStart: LocalDate,
-  periodEnd: LocalDate,
-  reportedAmount: BigDecimal,
-  notes: String
-)
+enum ValidationError:
+  case MissingIncome
+  case NegativeIncome
+  case NegativeExpense
+  case InvalidTaxYear
 ```
 
-Field meanings:
+Represents expected domain validation failures.
 
-- periodStart: The start date of the reporting period.
-- periodEnd: The end date of the reporting period.
-- reportedAmount: The financial amount reported for the period.
-- notes: Optional narrative context for the update.
+Validation errors are domain outcomes, not exceptions.
 
-Invariants:
+---
 
-- periodStart must be before or equal to periodEnd.
-- reportedAmount must be non-negative.
-- notes should be non-empty when present.
+## ValidationResult
 
-Related types:
+**Status:** Planned
 
-- QuarterlyUpdate
-
-## Planned service contracts
-
-### QuarterlyUpdateService
-
-Name: QuarterlyUpdateService
-
-Status: Planned
-
-Purpose: Coordinates the application flow for creating, validating, and managing quarterly updates.
-
-Scala shape:
+Conceptual contract:
 
 ```scala
-trait QuarterlyUpdateService {
-  def create(update: QuarterlyUpdate): Future[Either[DomainError, QuarterlyUpdate]]
-}
+Either[List[ValidationError], QuarterlyUpdateInput]
 ```
 
-Field meanings:
+Meaning:
 
-- create: Accepts a quarterly update and returns a future result that may succeed or fail with a domain error.
+```text
+Left(errors)  = validation failed
+Right(input)  = validation succeeded
+```
 
-Invariants:
+---
 
-- Validation should happen before persistence.
-- The method should not directly depend on Play HTTP types.
+# Application Errors
 
-Related types:
+## DomainError
 
-- QuarterlyUpdate
-- DomainError
-
-### QuarterlyUpdateRepository
-
-Name: QuarterlyUpdateRepository
-
-Status: Planned
-
-Purpose: Abstracts persistence for quarterly updates.
-
-Scala shape:
+**Status:** Planned
 
 ```scala
-trait QuarterlyUpdateRepository {
-  def save(update: QuarterlyUpdate): Future[QuarterlyUpdate]
-  def findById(id: String): Future[Option[QuarterlyUpdate]]
-}
+enum DomainError:
+  case ValidationFailed(errors: List[ValidationError])
+  case UpdateNotFound(id: String)
+  case InvalidStateTransition(
+    current: SubmissionStatus,
+    requested: SubmissionStatus
+  )
 ```
 
-Field meanings:
+Represents expected failures from application operations.
 
-- save: Persists a quarterly update.
-- findById: Retrieves a quarterly update by identifier.
+HTTP mapping belongs outside the domain layer.
 
-Invariants:
+---
 
-- The repository should expose asynchronous interfaces.
-- The repository should not leak HTTP-specific concerns.
+# Repository Contract
 
-Related types:
+## QuarterlyUpdateRepository
 
-- QuarterlyUpdate
-
-## Planned error types
-
-### DomainError
-
-Name: DomainError
-
-Status: Planned
-
-Purpose: Represents a business-level failure that may be returned by a service.
-
-Scala shape:
+**Status:** Planned
 
 ```scala
-sealed trait DomainError
+trait QuarterlyUpdateRepository:
+
+  def save(
+    update: QuarterlyUpdate
+  ): Future[QuarterlyUpdate]
+
+  def findById(
+    id: String
+  ): Future[Option[QuarterlyUpdate]]
 ```
 
-Field meanings:
+Semantics:
 
-- Domain errors describe the reason a requested business action could not proceed.
+```text
+Future = asynchronous persistence operation
+Option = entity may not exist
+```
 
-Invariants:
+The initial implementation will be in-memory.
 
-- Errors should be explicit and meaningful.
-- Domain errors should not be tied to HTTP transport details.
+---
 
-Related types:
+# Service Contract
 
-- QuarterlyUpdateService
+## QuarterlyUpdateService
 
-## Notes on wrapper semantics
+**Status:** Planned
 
-- Option is intended for absence. For example, a missing entity lookup may return None.
-- Either is intended for recoverable failures. A service can return Either[DomainError, T] when the business operation may fail without crashing the application.
-- Future is intended for asynchronous work such as repository access or other I/O-bound operations.
+```scala
+trait QuarterlyUpdateService:
 
-## Design guidance
+  def create(
+    input: QuarterlyUpdateInput
+  ): Future[Either[DomainError, QuarterlyUpdate]]
 
-The project is intended to follow a clear separation of concerns:
+  def findById(
+    id: String
+  ): Future[Either[DomainError, QuarterlyUpdate]]
 
-- HTTP concerns stay in routes and controllers.
-- Domain rules stay in domain types and service logic.
-- Persistence stays behind repository abstractions.
-- Error types stay domain-focused rather than HTTP-focused.
+  def submit(
+    id: String
+  ): Future[Either[DomainError, QuarterlyUpdate]]
+```
+
+The service coordinates domain behaviour and repository access.
+
+It must not depend on Play HTTP types.
+
+---
+
+# Wrapper Semantics
+
+Use these consistently:
+
+```text
+Option[T]
+```
+
+A value may legitimately be absent.
+
+```text
+Either[E, T]
+```
+
+An operation may return an expected failure.
+
+```text
+Future[T]
+```
+
+The result depends on asynchronous I/O.
+
+These wrapper types should communicate behaviour explicitly through function signatures rather than relying on hidden `null` values or normal-control-flow exceptions.
