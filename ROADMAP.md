@@ -82,10 +82,10 @@ Only valid quarterly reporting periods should be representable.
 
 Tasks:
 
-* [ ] Add failing tests for valid quarter values
-* [ ] Implement `Quarter`
-* [ ] Confirm invalid arbitrary integer quarter values cannot enter the domain
-* [ ] Refactor dependent test fixtures where required
+* [x] Add failing tests for valid quarter values
+* [x] Implement `Quarter`
+* [x] Confirm invalid arbitrary integer quarter values cannot enter the domain
+* [x] Refactor dependent test fixtures where required
 
 Contract:
 
