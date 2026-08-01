@@ -1,0 +1,23 @@
+# Scala / sbt
+.target/
+project/target/
+project/project/
+target/
+*.class
+*.log
+
+# IntelliJ / VS Code
+.idea/
+.vscode/
+*.iml
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Play / sbt generated
+logs/
+/.bsp/
+
+# Local environment
+.env
