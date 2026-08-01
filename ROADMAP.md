@@ -179,6 +179,39 @@ Relevant flow:
 
 ---
 
+## 1.6 Add TaxpayerReference
+
+Behaviour:
+
+Only structurally valid taxpayer references should be representable within the trusted domain. Validation confirms format plausibility only and does not verify the reference against any external tax authority.
+
+Tasks:
+
+* [ ] Implement `TaxpayerReference`
+* [ ] Define valid taxpayer reference format behaviour
+* [ ] Define invalid taxpayer reference format behaviour
+* [ ] Add failing tests for taxpayer reference invariants
+* [ ] Protect construction so invalid references cannot enter the trusted domain
+* [ ] Refactor `QuarterlyUpdateInput` to use `TaxpayerReference` instead of `String`
+* [ ] Update affected `QuarterlyUpdateInput` tests
+
+Contract:
+
+* `TaxpayerReference`
+* `QuarterlyUpdateInput`
+
+Relevant flow:
+
+* `APPFLOW.md` → Creating a Quarterly Update
+* `APPFLOW.md` → Validation Flow
+
+Notes:
+
+* Taxpayer reference validation is structural only.
+* The service must not imply that a reference has been verified against HMRC or any external system.
+* Invalid raw references should be rejected before construction of `QuarterlyUpdateInput`.
+---
+
 # Phase 2 — Input and Domain Validation
 
 **Status:** [ ] Planned
@@ -216,7 +249,6 @@ Tasks:
 Initial validation cases:
 
 * [ ] Missing income
-* [ ] Invalid tax year
 
 Contract:
 
