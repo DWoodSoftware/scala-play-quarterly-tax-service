@@ -177,11 +177,11 @@ Draft → Validated → Submitted
 
 ```scala
 final case class QuarterlyUpdateInput(
-  taxpayerReference: String,
-  taxYear: TaxYear,
-  quarter: Quarter,
-  income: List[IncomeEntry],
-  expenses: List[ExpenseEntry]
+    taxPayerReference: String,
+    taxYear: TaxYear,
+    quarter: Quarter,
+    income: List[IncomeEntry],
+    expenses: List[ExpenseEntry]
 )
 ```
 

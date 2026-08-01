@@ -191,9 +191,9 @@ Define the application input contract and explicit domain validation outcomes.
 
 Tasks:
 
-* [ ] Implement `QuarterlyUpdateInput`
-* [ ] Ensure client input excludes generated fields
-* [ ] Keep derived totals, IDs, lifecycle state, and submission timestamps server-controlled
+* [x] Implement `QuarterlyUpdateInput`
+* [x] Ensure client input excludes generated fields
+* [x] Keep derived totals, IDs, lifecycle state, and submission timestamps server-controlled
 
 Contract:
 
