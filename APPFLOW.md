@@ -208,13 +208,21 @@ For example:
 Income Entries
     │
     ├── Self Employment
-    └── Property
+    ├── Property
+    ├── Investment
+    ├── Pension
+    ├── StateBenefits
+    ├── Dividends
+    └── Other
 
 Expense Entries
     │
     ├── Travel
     ├── Office Costs
-    └── Professional Fees
+    ├── Professional Fees
+    ├── Advertising
+    ├── Equipment
+    └── Other
 ```
 
 The service/domain layer derives:

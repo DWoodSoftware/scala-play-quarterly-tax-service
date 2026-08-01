@@ -136,12 +136,12 @@ Financial entries must carry a supported category and monetary amount.
 
 Tasks:
 
-* [ ] Define valid income-entry behaviour
-* [ ] Define valid expense-entry behaviour
-* [ ] Add failing tests for invalid monetary values
-* [ ] Implement `IncomeEntry`
-* [ ] Implement `ExpenseEntry`
-* [ ] Decide whether non-negative monetary invariants belong in construction or validation
+* [x] Define valid income-entry behaviour
+* [x] Define valid expense-entry behaviour
+* [x] Add failing tests for invalid monetary values
+* [x] Implement `IncomeEntry`
+* [x] Implement `ExpenseEntry`
+* [x] Decide whether non-negative monetary invariants belong in construction or validation
 
 Contracts:
 
@@ -216,8 +216,6 @@ Tasks:
 Initial validation cases:
 
 * [ ] Missing income
-* [ ] Negative income
-* [ ] Negative expense
 * [ ] Invalid tax year
 
 Contract:

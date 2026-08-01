@@ -239,8 +239,6 @@ status != Submitted  ⇒ submittedAt.isEmpty
 ```scala
 enum ValidationError:
   case MissingIncome
-  case NegativeIncome
-  case NegativeExpense
   case InvalidTaxYear
 ```
 
