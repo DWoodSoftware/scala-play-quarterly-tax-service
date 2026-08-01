@@ -187,13 +187,13 @@ Only structurally valid taxpayer references should be representable within the t
 
 Tasks:
 
-* [ ] Implement `TaxpayerReference`
-* [ ] Define valid taxpayer reference format behaviour
-* [ ] Define invalid taxpayer reference format behaviour
-* [ ] Add failing tests for taxpayer reference invariants
-* [ ] Protect construction so invalid references cannot enter the trusted domain
-* [ ] Refactor `QuarterlyUpdateInput` to use `TaxpayerReference` instead of `String`
-* [ ] Update affected `QuarterlyUpdateInput` tests
+* [x] Implement `TaxpayerReference`
+* [x] Define valid taxpayer reference format behaviour
+* [x] Define invalid taxpayer reference format behaviour
+* [x] Add failing tests for taxpayer reference invariants
+* [x] Protect construction so invalid references cannot enter the trusted domain
+* [x] Refactor `QuarterlyUpdateInput` to use `TaxpayerReference` instead of `String`
+* [x] Update affected `QuarterlyUpdateInput` tests
 
 Contract:
 
