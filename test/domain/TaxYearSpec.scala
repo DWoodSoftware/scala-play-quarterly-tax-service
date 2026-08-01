@@ -20,7 +20,7 @@ class TaxYearSpec extends AnyWordSpec with Matchers {
         }
 
         "reject a tax year where the end year skips a year" in {
-            val result = TaxYear(2026, 2028)
+            val result = TaxYear.create(2026, 2028)
 
             result.isLeft shouldBe true
         }
