@@ -27,7 +27,7 @@ class TaxYearSpec extends AnyWordSpec with Matchers {
         }
 
         "reject a tax year where the end year is before the start year" in {
-            TaxYear.create(2026, 2025).result.isLeft shouldBe true
+            TaxYear.create(2026, 2025).isLeft shouldBe true
         }
     }
 }
