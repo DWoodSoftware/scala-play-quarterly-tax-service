@@ -68,7 +68,7 @@ Relevant contracts:
 
 # Phase 1 — Core Domain Model
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -163,10 +163,10 @@ Only recognised quarterly update states should be representable.
 
 Tasks:
 
-* [ ] Implement `SubmissionStatus`
-* [ ] Define legal lifecycle transitions in tests
-* [ ] Define illegal lifecycle transitions in tests
-* [ ] Keep transition behaviour outside HTTP concerns
+* [x] Implement `SubmissionStatus`
+* [x] Define legal lifecycle transitions in tests
+* [x] Define illegal lifecycle transitions in tests
+* [x] Keep transition behaviour outside HTTP concerns
 
 Contract:
 
