@@ -78,10 +78,15 @@ endYear == startYear + 1
 **Status:** Planned
 
 ```scala
-enum IncomeCategory:
-  case SelfEmployment
-  case Property
-  case Other
+enum IncomeCategory {
+    case SelfEmployment 
+    case Property 
+    case Investment 
+    case Pension 
+    case StateBenefits 
+    case Dividends 
+    case Other
+}
 ```
 
 Defines supported income classifications.
@@ -93,11 +98,14 @@ Defines supported income classifications.
 **Status:** Planned
 
 ```scala
-enum ExpenseCategory:
-  case Travel
-  case OfficeCosts
-  case ProfessionalFees
-  case Other
+enum ExpenseCategory {
+    case Travel 
+    case OfficeCosts 
+    case ProfessionalFees 
+    case Advertising 
+    case Equipment 
+    case Other
+}
 ```
 
 Defines supported expense classifications.

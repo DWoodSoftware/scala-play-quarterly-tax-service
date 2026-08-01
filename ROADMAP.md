@@ -117,9 +117,9 @@ Contract:
 
 Tasks:
 
-* [ ] Implement `IncomeCategory`
-* [ ] Implement `ExpenseCategory`
-* [ ] Add focused type-level tests where meaningful
+* [x] Implement `IncomeCategory`
+* [x] Implement `ExpenseCategory`
+* [x] Add focused type-level tests where meaningful
 
 Contracts:
 
