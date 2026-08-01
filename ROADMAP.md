@@ -242,13 +242,13 @@ Relevant flow:
 
 Tasks:
 
-* [ ] Implement `ValidationError`
-* [ ] Define expected failure cases
-* [ ] Keep validation errors independent from HTTP status codes
+* [x] Implement `ValidationError`
+* [x] Define expected failure cases
+* [x] Keep validation errors independent from HTTP status codes
 
 Initial validation cases:
 
-* [ ] Missing income
+* [x] Missing income
 
 Contract:
 
