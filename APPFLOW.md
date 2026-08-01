@@ -1,100 +1,774 @@
-# Application flow
+# Application Flow
 
-This document describes how the application behaves today and how the architecture is intended to evolve. It is the canonical behavioural description for the repository at the current stage of implementation.
+This document defines the intended behavioural and architectural flow of the Quarterly Tax Service.
 
-## Overview
+It describes how requests move through the application, how quarterly updates progress through their lifecycle, where validation occurs, and which application layers are responsible for each operation.
 
-The project is a small Play Framework backend that exposes a simple health endpoint and is structured to support a larger quarterly reporting service in future iterations. The current implementation is intentionally minimal, but the architecture is already organised around the layered pattern used by the larger system.
+Exact domain models, contracts, enums, and error types are defined separately in [TYPES.md](./TYPES.md).
 
-## Current implemented behaviour
+Implementation progress is tracked in [ROADMAP.md](./ROADMAP.md).
 
-At present, the application exposes one HTTP endpoint:
+---
 
-- GET /health
+## 1. Application Purpose
 
-When this endpoint is requested, the request enters the Play router, is routed to the health controller, and the controller returns a JSON response with the shape:
+The application is a small Scala and Play Framework microservice modelling a fictional quarterly digital financial reporting system.
 
-```json
+A client can:
+
+1. Create a quarterly financial update.
+2. Supply income and expense records.
+3. Retrieve an existing update.
+4. Validate the update against domain rules.
+5. Submit a valid draft.
+6. Receive explicit validation or state-transition errors when an operation cannot be completed.
+
+The service calculates financial totals itself rather than trusting derived values supplied by the client.
+
+The application does **not** calculate real tax liabilities or communicate with HMRC.
+
+All data and behaviour are fictional and exist solely as a technical demonstration.
+
+---
+
+# 2. High-Level Architecture
+
+The normal application flow is:
+
+```text
+HTTP Request
+      │
+      ▼
+Play Router
+      │
+      ▼
+Controller
+      │
+      ▼
+Application Service
+      │
+      ├────► Domain Validation / Business Rules
+      │
+      ▼
+Repository Contract
+      │
+      ▼
+Persistence Implementation
+      │
+      ▼
+Application Service
+      │
+      ▼
+Controller
+      │
+      ▼
+HTTP Response
+```
+
+Each layer has a deliberately limited responsibility.
+
+HTTP concerns must not leak into the domain layer, and persistence implementation details must not influence business rules.
+
+---
+
+# 3. Quarterly Update Lifecycle
+
+A quarterly update progresses through an explicit lifecycle.
+
+The initial intended state model is:
+
+```text
+                 ┌─────────────┐
+                 │    DRAFT    │
+                 └──────┬──────┘
+                        │
+                     validate
+                        │
+                ┌───────┴────────┐
+                │                │
+                ▼                ▼
+          validation         validation
+           succeeds            fails
+                │                │
+                ▼                ▼
+          ┌───────────┐    remains DRAFT
+          │ VALIDATED │    + errors returned
+          └─────┬─────┘
+                │
+              submit
+                │
+                ▼
+          ┌───────────┐
+          │ SUBMITTED │
+          └───────────┘
+```
+
+`SUBMITTED` represents a terminal state for the initial implementation.
+
+A submitted quarterly update cannot be modified or submitted again.
+
+Exact state definitions are maintained in `TYPES.md`.
+
+---
+
+# 4. Creating a Quarterly Update
+
+The primary creation endpoint will be:
+
+```text
+POST /api/v1/quarterly-updates
+```
+
+## Request flow
+
+```text
+Client
+  │
+  │ POST quarterly financial data
+  ▼
+Router
+  │
+  ▼
+QuarterlyUpdateController
+  │
+  │ Parse JSON
+  │ Validate request structure
+  ▼
+QuarterlyUpdateService
+  │
+  ▼
+Domain Validator
+  │
+  │ Validate business invariants
+  ▼
+Calculate Derived Totals
+  │
+  ▼
+Create DRAFT Submission
+  │
+  ▼
+QuarterlyUpdateRepository
+  │
+  ▼
+Persist
+  │
+  ▼
+201 Created
+```
+
+### Controller responsibility
+
+The controller is responsible for determining whether the incoming HTTP request can be converted into the appropriate application input.
+
+It handles concerns such as:
+
+* malformed JSON,
+* missing required JSON properties,
+* JSON type mismatches,
+* HTTP status selection.
+
+It does **not** determine whether the financial information is valid according to business rules.
+
+### Service responsibility
+
+Once a structurally valid request has been created, the service coordinates the application use case.
+
+The service:
+
+1. sends the input through domain validation,
+2. calculates derived financial values,
+3. constructs the appropriate domain entity,
+4. coordinates persistence,
+5. returns an explicit application outcome.
+
+### Domain responsibility
+
+The domain layer determines whether the supplied information represents a valid quarterly update.
+
+Examples include:
+
+* quarter must represent Q1-Q4,
+* monetary amounts must satisfy the defined financial invariants,
+* required financial information must be present,
+* only legal state transitions may occur.
+
+These rules should preferably be expressed using types and pure functions.
+
+Where practical, invalid states should be made impossible to represent rather than repeatedly checked at runtime.
+
+---
+
+# 5. Financial Calculation Flow
+
+The client supplies raw financial records.
+
+For example:
+
+```text
+Income Entries
+    │
+    ├── Self Employment
+    └── Property
+
+Expense Entries
+    │
+    ├── Travel
+    ├── Office Costs
+    └── Professional Fees
+```
+
+The service/domain layer derives:
+
+```text
+Total Income
+     │
+     │ minus
+     ▼
+Total Expenses
+     │
+     ▼
+Net Amount
+```
+
+Derived values must never be accepted as authoritative values from the client.
+
+Conceptually:
+
+```text
+netAmount = totalIncome - totalExpenses
+```
+
+The exact monetary and category types are defined in `TYPES.md`.
+
+The application deliberately does not calculate real-world tax liability.
+
+---
+
+# 6. Retrieving a Quarterly Update
+
+The retrieval endpoint will be:
+
+```text
+GET /api/v1/quarterly-updates/:id
+```
+
+Flow:
+
+```text
+Request
+   │
+   ▼
+Controller
+   │
+   ▼
+Service
+   │
+   ▼
+Repository.findById(id)
+   │
+   ▼
+Future[Option[QuarterlyUpdate]]
+   │
+   ├── Some(update) ──► 200 OK
+   │
+   └── None ─────────► 404 Not Found
+```
+
+Absence is treated as an expected application outcome rather than an exceptional failure.
+
+The repository contract therefore represents absence explicitly.
+
+---
+
+# 7. Validation Flow
+
+Validation occurs at two distinct boundaries.
+
+## Transport validation
+
+Performed by the Play/controller layer.
+
+This answers:
+
+> "Can this HTTP request be converted into the expected application input?"
+
+Examples:
+
+* valid JSON,
+* required properties present,
+* correct JSON primitive types.
+
+Failure results in:
+
+```text
+400 Bad Request
+```
+
+## Domain validation
+
+Performed outside the controller.
+
+This answers:
+
+> "Does this structurally valid input satisfy our business rules?"
+
+Conceptually:
+
+```text
+QuarterlyUpdateInput
+       │
+       ▼
+     validate
+       │
+       ▼
+Either[List[ValidationError], ValidQuarterlyUpdate]
+```
+
+A domain validation failure is an expected result.
+
+It should therefore be represented through the application's type system rather than thrown as an exception.
+
+---
+
+# 8. Submission Flow
+
+A valid draft may be submitted using:
+
+```text
+POST /api/v1/quarterly-updates/:id/submit
+```
+
+The intended flow is:
+
+```text
+Submission Request
+       │
+       ▼
+Find Quarterly Update
+       │
+       ├── Not Found
+       │      │
+       │      ▼
+       │   404 Not Found
+       │
+       ▼
+Inspect Current State
+       │
+       ├── SUBMITTED
+       │      │
+       │      ▼
+       │   409 Conflict
+       │
+       ▼
+Validate
+       │
+       ├── Invalid
+       │      │
+       │      ▼
+       │   Validation Errors
+       │
+       ▼
+Transition
+DRAFT → VALIDATED → SUBMITTED
+       │
+       ▼
+Persist Updated State
+       │
+       ▼
+Return Submission
+```
+
+State transitions are domain behaviour.
+
+Controllers must never directly modify submission state.
+
+---
+
+# 9. State Transition Rules
+
+The application should explicitly control state transitions.
+
+Initially permitted:
+
+```text
+DRAFT → VALIDATED
+VALIDATED → SUBMITTED
+```
+
+Not permitted:
+
+```text
+SUBMITTED → DRAFT
+
+SUBMITTED → VALIDATED
+
+SUBMITTED → SUBMITTED
+```
+
+Attempting an invalid transition should produce an explicit domain/application error.
+
+It should not silently succeed.
+
+---
+
+# 10. Repository Flow
+
+Persistence is accessed exclusively through repository contracts.
+
+Application services should depend upon abstractions such as:
+
+```text
+QuarterlyUpdateRepository
+```
+
+rather than a particular database implementation.
+
+The initial implementation will use:
+
+```text
+QuarterlyUpdateRepository
+        ▲
+        │ implements
+        │
+InMemoryQuarterlyUpdateRepository
+```
+
+This allows the application behaviour to be developed and tested without introducing database infrastructure.
+
+A future persistence implementation could replace the in-memory repository without changing domain behaviour.
+
+---
+
+# 11. Asynchronous Boundaries
+
+Domain calculations should remain synchronous and deterministic where possible.
+
+For example:
+
+```text
+validate(update)
+
+calculateTotals(update)
+
+transitionState(update)
+```
+
+These operations do not require asynchronous execution.
+
+Infrastructure operations may be asynchronous.
+
+For example:
+
+```text
+repository.findById(id)
+
+repository.save(update)
+```
+
+Repository contracts may therefore expose results such as:
+
+```text
+Future[Option[T]]
+```
+
+This distinction is intentional.
+
+Pure domain logic should not become asynchronous simply because the surrounding application uses asynchronous infrastructure.
+
+---
+
+# 12. Error Flow
+
+Errors are separated according to their origin.
+
+```text
+Incoming Request
+      │
+      ├── Malformed HTTP/JSON
+      │       └── 400 Bad Request
+      │
+      ├── Domain Validation Failure
+      │       └── 422 Unprocessable Entity
+      │
+      ├── Resource Missing
+      │       └── 404 Not Found
+      │
+      ├── Illegal State Transition
+      │       └── 409 Conflict
+      │
+      └── Unexpected Infrastructure Failure
+              └── 500 Internal Server Error
+```
+
+Expected domain failures should use explicit typed outcomes.
+
+Exceptions should primarily represent unexpected technical or infrastructure failures.
+
+Exact error contracts are defined in `TYPES.md`.
+
+---
+
+# 13. Health Flow
+
+**Status: Implemented**
+
+The currently implemented endpoint is:
+
+```text
+GET /health
+```
+
+Flow:
+
+```text
+GET /health
+     │
+     ▼
+Play Router
+     │
+     ▼
+HealthController
+     │
+     ▼
+200 OK
+
 {
   "status": "UP"
 }
 ```
 
-This is a simple, synchronous request flow. The controller is responsible for handling the HTTP response and does not contain any business logic beyond returning the health payload.
+This endpoint intentionally does not involve the service, domain, or repository layers because it contains no business behaviour.
 
-## Request flow
+It currently acts as the minimal vertical slice proving that the Play application can route, execute, serialise JSON, and be tested successfully.
 
-A request enters the application through the Play server and follows the standard MVC-style path:
+---
 
-1. The router matches the incoming request path.
-2. The controller receives the request and prepares the response.
-3. The controller returns a Play result to the framework.
-4. Play serialises the result and sends the HTTP response back to the client.
+# 14. Layer Responsibilities
 
-At this stage, the flow is intentionally simple and does not yet involve services, validators, repositories, or persistence.
+## Routes
 
-## Layer responsibilities
+Responsible for:
 
-### Routes
+* HTTP method mapping,
+* URL mapping,
+* controller action selection.
 
-Routes are responsible only for mapping HTTP paths to controller actions. They do not perform business logic or contain domain rules.
+Routes contain no business logic.
 
-### Controllers
+## Controllers
 
-Controllers handle HTTP concerns such as request parsing, response generation, and status code selection. They should remain thin and delegate behaviour to the application layer when the behaviour becomes more complex.
+Responsible for:
 
-### Services
+* HTTP request handling,
+* JSON parsing,
+* transport validation,
+* invoking application services,
+* translating application outcomes into HTTP responses.
 
-Services coordinate application use cases and orchestrate behaviour. In the current implementation, there is no service layer yet because the health endpoint is trivial. In the broader project direction, services will contain the application workflow and coordinate domain validation and persistence concerns.
+Controllers remain thin.
 
-### Domain logic
+## Services
 
-Domain logic represents business rules and deterministic behaviour. In this project, the domain layer is intentionally minimal at the moment. As the application grows, domain objects and pure functions will describe the rules of quarterly reporting without depending on Play or HTTP.
+Responsible for:
 
-### Validators
+* coordinating use cases,
+* invoking domain behaviour,
+* coordinating repository operations,
+* controlling application workflow.
 
-Validators enforce business rules before an operation is accepted. In the future, validation will occur before state transitions such as moving from draft to submitted. Validation outcomes should be explicit and should be handled in a structured way rather than embedded inside the controller.
+Services should not depend on HTTP concepts.
 
-### Repositories
+## Domain
 
-Repositories abstract persistence concerns. At the moment, no repository layer is implemented. The intended design is that services depend on repository abstractions rather than concrete persistence implementations, with an in-memory implementation used initially.
+Responsible for:
 
-## Boundaries between layers
+* business entities,
+* business rules,
+* state transitions,
+* deterministic calculations,
+* domain validation.
 
-The architectural boundary is intentionally clear:
+The domain must not depend on Play HTTP APIs.
 
-- HTTP concerns belong to routes and controllers.
-- Business rules belong to the domain layer and services.
-- Persistence concerns belong to repositories.
-- Controllers should not contain business rules.
-- Domain models should not depend on Play HTTP APIs.
+## Validators
 
-## Asynchronous behaviour
+Responsible for:
 
-The application is currently synchronous for the health endpoint. The architecture is intended to support asynchronous operations through Future-based service and repository interfaces as the product evolves. This is part of the design direction for later stages and is not yet exercised by the implemented behaviour.
+* evaluating business invariants that cannot be encoded directly into types,
+* returning explicit validation outcomes.
 
-## Validation and failure behaviour
+Validation should preferably be deterministic and side-effect free.
 
-There is no business validation flow implemented yet. The health endpoint is always successful when called. In future iterations, validation failures will be handled in a structured manner so that invalid input does not reach persistence or state-changing business logic.
+## Repositories
 
-## Planned behaviour
+Responsible for:
 
-The following behaviour is planned for future implementation and is not part of the current system behaviour:
+* persistence contracts,
+* retrieving domain data,
+* storing domain data.
 
-- Quarterly update creation and retrieval
-- Validation of quarter identifiers and submission state
-- Transitioning entities from Draft to Submitted
-- Repository-backed storage with an in-memory initial implementation
-- Structured error translation into HTTP responses
+Repositories must not contain business rules.
 
-These planned areas should be treated as future work and are intentionally not described as implemented behaviour.
+---
 
-## Notes for contributors
+# 15. Architectural Boundaries
 
-When changing this application, keep the architecture consistent with the layered approach:
+Dependencies should generally flow inward:
 
-- Keep routes focused on routing.
-- Keep controllers focused on HTTP.
-- Keep business rules in the domain and service layers.
-- Keep persistence behind repository abstractions.
-- Update this document whenever the actual application behaviour changes.
+```text
+HTTP / Play
+     │
+     ▼
+Application Services
+     │
+     ▼
+Domain
+```
+
+Persistence is accessed through abstractions:
+
+```text
+Service
+   │
+   ▼
+Repository Contract
+   ▲
+   │
+Infrastructure Implementation
+```
+
+The domain should not know:
+
+* which HTTP framework is being used,
+* how JSON is represented,
+* which database is being used,
+* how the application is deployed.
+
+This keeps business behaviour independently testable.
+
+---
+
+# 16. TDD Development Flow
+
+Application behaviour is developed incrementally using:
+
+```text
+RED
+ │
+ │ Define expected behaviour
+ ▼
+Failing Test
+ │
+ ▼
+GREEN
+ │
+ │ Minimum implementation
+ ▼
+Passing Test
+ │
+ ▼
+REFACTOR
+ │
+ │ Improve design while preserving behaviour
+ ▼
+Next Behaviour
+```
+
+Tests should focus on externally meaningful behaviour and domain contracts rather than implementation details.
+
+The expected workflow for a feature is therefore:
+
+```text
+Define behaviour
+      ↓
+Define/update required contracts
+      ↓
+Write failing test
+      ↓
+Implement minimum behaviour
+      ↓
+Run tests
+      ↓
+Refactor
+      ↓
+Update documentation
+      ↓
+Commit coherent change
+```
+
+Where implementation reveals that the existing type model permits invalid states unnecessarily, the preferred response is to improve the type model rather than add repeated defensive checks.
+
+---
+
+# 17. Documentation Relationships
+
+The repository documentation has four distinct responsibilities.
+
+```text
+README.md
+    │
+    └── What is this project?
+
+APPFLOW.md
+    │
+    └── How does the system behave?
+
+TYPES.md
+    │
+    └── What contracts and domain types exist?
+
+ROADMAP.md
+    │
+    └── What are we implementing and in what order?
+```
+
+`TYPES.md` is the canonical source for exact contract definitions.
+
+This document should reference those contracts rather than duplicate them unnecessarily.
+
+---
+
+# 18. Current Implementation Status
+
+Currently implemented:
+
+* Play application bootstrap.
+* `GET /health`.
+* JSON health response.
+* Automated health endpoint test.
+
+Designed but not yet implemented:
+
+* Quarterly update domain model.
+* Financial entry models.
+* Validation contracts.
+* Creation workflow.
+* Retrieval workflow.
+* Submission state machine.
+* Repository abstraction.
+* In-memory repository.
+* Structured domain errors.
+* HTTP error translation.
+* Asynchronous repository operations.
+
+Implementation order is maintained in `ROADMAP.md`.
+
+---
+
+# 19. Contributor Rules
+
+When extending the application:
+
+1. Define expected behaviour before implementation.
+2. Update or define relevant contracts in `TYPES.md`.
+3. Add the failing behavioural test.
+4. Implement the minimum code required to satisfy the behaviour.
+5. Refactor while keeping tests green.
+6. Preserve architectural boundaries.
+7. Update `APPFLOW.md` when application behaviour changes.
+8. Update `ROADMAP.md` when implementation status changes.
+9. Keep `README.md` aligned with functionality that actually exists.
+
+The goal is not simply to produce a functioning API.
+
+The repository should demonstrate deliberate domain modelling, type-driven design, TDD, clear architectural boundaries, incremental delivery, and professional Git discipline.
