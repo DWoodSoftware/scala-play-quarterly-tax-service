@@ -6,16 +6,13 @@ import org.scalatest.matchers.should.Matchers
 class QuarterSpec extends AnyFunSpec with Matchers {
 
   describe("Quarter") {
-    it("only exposes the supported quarter values") {
-      Quarter.values.toList should contain theSameElementsAs List(Quarter.Q1, Quarter.Q2, Quarter.Q3, Quarter.Q4)
+    it("exposes the four supported quarter values") {
+      Quarter.all shouldBe List(Quarter.Q1, Quarter.Q2, Quarter.Q3, Quarter.Q4)
     }
 
-    it("does not allow arbitrary integer or string values to be represented") {
-      Quarter.values.toList should have size 4
-      Quarter.values.exists(_ == Quarter.Q1) shouldBe true
-      Quarter.values.exists(_ == Quarter.Q2) shouldBe true
-      Quarter.values.exists(_ == Quarter.Q3) shouldBe true
-      Quarter.values.exists(_ == Quarter.Q4) shouldBe true
+    it("does not expose arbitrary values beyond the supported quarter set") {
+      Quarter.all should have size 4
+      Quarter.all.map(_.toString) shouldBe List("Q1", "Q2", "Q3", "Q4")
     }
   }
 }
