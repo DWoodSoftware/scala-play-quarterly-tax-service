@@ -430,13 +430,13 @@ A structurally valid and domain-valid request becomes a persisted draft quarterl
 
 Tasks:
 
-* [ ] Add failing service test
-* [ ] Validate input
-* [ ] Calculate derived totals
-* [ ] Construct draft entity
-* [ ] Persist entity
-* [ ] Return explicit `Either` outcome
-* [ ] Keep service independent from Play HTTP types
+* [x] Add failing service test
+* [x] Validate input
+* [x] Calculate derived totals
+* [x] Construct draft entity
+* [x] Persist entity
+* [x] Return explicit `Either` outcome
+* [x] Keep service independent from Play HTTP types
 
 Contract:
 
