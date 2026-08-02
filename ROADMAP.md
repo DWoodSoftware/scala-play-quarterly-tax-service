@@ -358,11 +358,11 @@ Introduce persistence as an asynchronous abstraction without coupling applicatio
 
 Tasks:
 
-* [ ] Implement `QuarterlyUpdateRepository`
-* [ ] Define asynchronous save contract
-* [ ] Define asynchronous lookup contract
-* [ ] Represent missing entities using `Option`
-* [ ] Keep repository free of HTTP and domain workflow logic
+* [x] Implement `QuarterlyUpdateRepository`
+* [x] Define asynchronous save contract
+* [x] Define asynchronous lookup contract
+* [x] Represent missing entities using `Option`
+* [x] Keep repository free of HTTP and domain workflow logic
 
 Contract:
 
