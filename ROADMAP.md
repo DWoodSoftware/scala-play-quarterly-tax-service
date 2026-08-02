@@ -295,10 +295,10 @@ The server calculates all derived financial values from client-supplied entries.
 
 Tasks:
 
-* [ ] Add failing tests for total income
-* [ ] Implement total income calculation
-* [ ] Add failing tests for total expenses
-* [ ] Implement total expense calculation
+* [x] Add failing tests for total income
+* [x] Implement total income calculation
+* [x] Add failing tests for total expenses
+* [x] Implement total expense calculation
 * [ ] Add failing tests for net amount
 * [ ] Implement `netAmount = totalIncome - totalExpenses`
 * [ ] Verify derived values cannot be supplied authoritatively by the client
