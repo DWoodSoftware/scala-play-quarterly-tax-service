@@ -1,0 +1,113 @@
+package services
+
+import domain.*
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
+import repositories.QuarterlyUpdateRepository
+
+import scala.concurrent.Future
+
+class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
+
+  "QuarterlyUpdateService.create" should {
+
+    "validate, create, and persist a draft quarterly update" in {
+      var persisted: Option[QuarterlyUpdate] = None
+
+      val repository = new QuarterlyUpdateRepository {
+
+        override def save(
+            update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] = {
+          persisted = Some(update)
+          Future.successful(update)
+        }
+
+        override def findById(
+            id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(None)
+      }
+
+      val service = new QuarterlyUpdateService(repository)
+
+      val input = validInput()
+
+      service.create(input).map { result =>
+        result match {
+          case Right(update) =>
+            update.status shouldBe SubmissionStatus.Draft
+            persisted shouldBe Some(update)
+
+          case Left(error) =>
+            fail(s"Expected successful creation, got: $error")
+        }
+      }
+    }
+
+    "return a validation failure without persisting invalid input" in {
+      var saveCalled = false
+
+      val repository = new QuarterlyUpdateRepository {
+
+        override def save(
+            update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] = {
+          saveCalled = true
+          Future.successful(update)
+        }
+
+        override def findById(
+            id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(None)
+      }
+
+      val service = new QuarterlyUpdateService(repository)
+
+      val input =
+        validInput().copy(income = List.empty)
+
+      service.create(input).map { result =>
+        result shouldBe Left(
+          DomainError.ValidationFailed(
+            List(ValidationError.MissingIncome)
+          )
+        )
+
+        saveCalled shouldBe false
+      }
+    }
+  }
+
+  private def validInput(): QuarterlyUpdateInput = {
+    val taxpayerReference =
+      TaxpayerReference.create("TAX-12345678") match {
+        case Right(value) => value
+        case Left(error)  => fail(error)
+      }
+
+    val taxYear =
+      TaxYear.create(2026, 2027) match {
+        case Right(value) => value
+        case Left(error)  => fail(error)
+      }
+
+    val income =
+      IncomeEntry.create(
+        IncomeCategory.SelfEmployment,
+        BigDecimal("1500.00")
+      ) match {
+        case Right(value) => value
+        case Left(error)  => fail(error)
+      }
+
+    QuarterlyUpdateInput(
+      taxpayerReference = taxpayerReference,
+      taxYear = taxYear,
+      quarter = Quarter.Q1,
+      income = List(income),
+      expenses = List.empty
+    )
+  }
+}
