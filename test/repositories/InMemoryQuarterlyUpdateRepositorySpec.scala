@@ -21,6 +21,15 @@ class InMemoryQuarterlyUpdateRepositorySpec extends AsyncWordSpec with Matchers 
             }
         }
     }
+
+    "return None when a quarterly update does not exist" in {
+        val repository: QuarterlyUpdateRepository =
+            new InMemoryQuarterlyUpdateRepository
+
+        repository.findById("missing-id").map { result =>
+            result shouldBe None
+        }
+    }
   }
 
   private def validInput(): QuarterlyUpdateInput = {
