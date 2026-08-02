@@ -40,6 +40,16 @@ class QuarterlyUpdateSpec extends AnyWordSpec with Matchers {
     "never set submittedAt when initially created" in {
         QuarterlyUpdate.create(validInput()).submittedAt shouldBe None
     }
+
+    "preserve entity invariants after creation" in {
+        val update = QuarterlyUpdate.create(validInput())
+
+        update.totalIncome shouldBe FinancialCalculator.totalIncome(update.income)
+        update.totalExpenses shouldBe FinancialCalculator.totalExpenses(update.expenses)
+        update.netAmount shouldBe update.totalIncome - update.totalExpenses
+        update.status shouldBe SubmissionStatus.Draft
+        update.submittedAt shouldBe None
+    }
   }
 
   private def validInput(): QuarterlyUpdateInput = {
