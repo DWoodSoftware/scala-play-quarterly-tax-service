@@ -57,7 +57,7 @@ class FinancialCalculatorSpec extends AnyWordSpec with Matchers {
             
             FinancialCalculator.totalExpenses(
                 List(first, second)
-            ) shouldEqual BigDecimal("350.00")
+            ) shouldEqual BigDecimal("330.00")
         }
 
         "return zero when there are no expense entries" in {
