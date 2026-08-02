@@ -65,5 +65,19 @@ class FinancialCalculatorSpec extends AnyWordSpec with Matchers {
                 List.empty
             ) shouldBe BigDecimal("0")
         }
+
+        "calculate net amount from total income and total expenses" in {
+            FinancialCalculator.netAmount(
+                totalIncome = BigDecimal("1750.00"),
+                totalExpenses = BigDecimal("330.00")
+            ) shouldEqual BigDecimal("1420.00")
+        }
+
+        "allow a negative net amount when expenses exceed income" in {
+            FinancialCalculator.netAmount(
+                totalIncome = BigDecimal("500.00"),
+                totalExpenses = BigDecimal("750.00")
+            ) shouldEqual BigDecimal("-250.00")
+        }
     }
 }
