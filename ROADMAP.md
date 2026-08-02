@@ -374,12 +374,12 @@ Contract:
 
 Tasks:
 
-* [ ] Add repository contract tests
-* [ ] Implement `InMemoryQuarterlyUpdateRepository`
-* [ ] Verify save behaviour
-* [ ] Verify lookup behaviour
-* [ ] Verify missing lookup returns `None`
-* [ ] Keep storage implementation hidden behind repository abstraction
+* [x] Add repository contract tests
+* [x] Implement `InMemoryQuarterlyUpdateRepository`
+* [x] Verify save behaviour
+* [x] Verify lookup behaviour
+* [x] Verify missing lookup returns `None`
+* [x] Keep storage implementation hidden behind repository abstraction
 
 Relevant flow:
 
