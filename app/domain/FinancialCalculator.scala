@@ -10,4 +10,10 @@ object FinancialCalculator {
         entries: List[ExpenseEntry]
     ): BigDecimal =
         entries.map(_.amount).sum
+
+    def netAmount(
+        totalIncome: BigDecimal,
+        totalExpenses: BigDecimal
+    ): BigDecimal =
+        totalIncome - totalExpenses
 }
