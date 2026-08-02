@@ -35,5 +35,35 @@ class FinancialCalculatorSpec extends AnyWordSpec with Matchers {
                 List.empty
             ) shouldBe BigDecimal("0")
         }
+
+        "calculate total expenses from all expense entries" in {
+            val first =
+                ExpenseEntry.create(
+                    ExpenseCategory.OfficeCosts,
+                    BigDecimal("250.00")
+                ) match {
+                    case Right(value) => value
+                    case Left(error) => fail(error)
+                }
+
+            val second =
+                ExpenseEntry.create(
+                    ExpenseCategory.Travel,
+                    BigDecimal("80.00")
+                ) match {
+                    case Right(value) => value
+                    case Left(error) => fail(error)
+                }
+            
+            FinancialCalculator.totalExpenses(
+                List(first, second)
+            ) shouldEqual BigDecimal("350.00")
+        }
+
+        "return zero when there are no expense entries" in {
+            FinancialCalculator.totalExpenses(
+                List.empty
+            ) shouldBe BigDecimal("0")
+        }
     }
 }
