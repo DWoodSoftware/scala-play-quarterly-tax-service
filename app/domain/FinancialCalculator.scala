@@ -5,4 +5,9 @@ object FinancialCalculator {
         entries: List[IncomeEntry]
     ): BigDecimal = 
         entries.map(_.amount).sum
+
+    def totalExpenses(
+        entries: List[ExpenseEntry]
+    ): BigDecimal =
+        entries.map(_.amount).sum
 }
