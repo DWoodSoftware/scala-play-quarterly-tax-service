@@ -299,8 +299,8 @@ Tasks:
 * [x] Implement total income calculation
 * [x] Add failing tests for total expenses
 * [x] Implement total expense calculation
-* [ ] Add failing tests for net amount
-* [ ] Implement `netAmount = totalIncome - totalExpenses`
+* [x] Add failing tests for net amount
+* [x] Implement `netAmount = totalIncome - totalExpenses`
 * [ ] Verify derived values cannot be supplied authoritatively by the client
 * [ ] Refactor calculation logic into small pure functions
 
