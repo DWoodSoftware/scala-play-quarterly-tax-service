@@ -398,11 +398,11 @@ Represent expected application failures explicitly before building service orche
 
 Tasks:
 
-* [ ] Implement `DomainError`
-* [ ] Add `ValidationFailed`
-* [ ] Add `UpdateNotFound`
-* [ ] Add `InvalidStateTransition`
-* [ ] Verify application failures remain independent of HTTP concerns
+* [x] Implement `DomainError`
+* [x] Add `ValidationFailed`
+* [x] Add `UpdateNotFound`
+* [x] Add `InvalidStateTransition`
+* [x] Verify application failures remain independent of HTTP concerns
 
 Contract:
 
