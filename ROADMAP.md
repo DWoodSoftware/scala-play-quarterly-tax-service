@@ -301,8 +301,8 @@ Tasks:
 * [x] Implement total expense calculation
 * [x] Add failing tests for net amount
 * [x] Implement `netAmount = totalIncome - totalExpenses`
-* [ ] Verify derived values cannot be supplied authoritatively by the client
-* [ ] Refactor calculation logic into small pure functions
+* [x] Verify derived values cannot be supplied authoritatively by the client
+* [x] Refactor calculation logic into small pure functions
 
 Relevant contracts:
 
