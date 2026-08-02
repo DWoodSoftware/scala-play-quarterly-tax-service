@@ -21,3 +21,4 @@ logs/
 
 # Local environment
 .env
+.metals/.reports/metals-full/*

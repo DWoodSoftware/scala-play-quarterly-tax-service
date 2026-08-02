@@ -264,12 +264,12 @@ Structurally valid input may still fail business validation.
 
 Tasks:
 
-* [ ] Add failing validation tests first
-* [ ] Implement pure validation functions
-* [ ] Return explicit validation outcomes
-* [ ] Use `Either[List[ValidationError], QuarterlyUpdateInput]`
-* [ ] Avoid exceptions for expected validation failures
-* [ ] Keep validation side-effect free
+* [x] Add failing validation tests first
+* [x] Implement pure validation functions
+* [x] Return explicit validation outcomes
+* [x] Use `Either[List[ValidationError], QuarterlyUpdateInput]`
+* [x] Avoid exceptions for expected validation failures
+* [x] Keep validation side-effect free
 
 Contract:
 
