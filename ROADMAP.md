@@ -327,13 +327,13 @@ Create the persisted domain representation produced from validated input and ser
 
 Tasks:
 
-* [ ] Add tests defining creation behaviour
-* [ ] Implement `QuarterlyUpdate`
-* [ ] Generate server-controlled identifier
-* [ ] Populate derived financial totals
-* [ ] Set initial state to `Draft`
-* [ ] Ensure `submittedAt` is empty for non-submitted entities
-* [ ] Test entity invariants
+* [x] Add tests defining creation behaviour
+* [x] Implement `QuarterlyUpdate`
+* [x] Generate server-controlled identifier
+* [x] Populate derived financial totals
+* [x] Set initial state to `Draft`
+* [x] Ensure `submittedAt` is empty for non-submitted entities
+* [x] Test entity invariants
 
 Contract:
 
