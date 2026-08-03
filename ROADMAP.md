@@ -456,9 +456,9 @@ Existing updates are returned; missing updates become explicit application error
 
 Tasks:
 
-* [ ] Add failing lookup tests
-* [ ] Implement repository lookup orchestration
-* [ ] Translate `None` into `UpdateNotFound`
+* [x] Add failing lookup tests
+* [x] Implement repository lookup orchestration
+* [x] Translate `None` into `UpdateNotFound`
 
 Contract:
 
