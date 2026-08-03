@@ -1,1 +1,2 @@
-GET     /health     controllers.HealthController.health
+GET     /health                       controllers.HealthController.health
+POST    /api/v1/quarterly-updates     controllers.QuarterlyUpdateController.create

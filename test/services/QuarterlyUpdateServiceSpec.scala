@@ -31,7 +31,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(draft))
         }
 
-        val service = new QuarterlyUpdateService(repository)
+        val service = new QuarterlyUpdateService(repository, executionContext)
 
         service.submit(draft.id).map { result =>
             result match {
@@ -60,7 +60,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(None)
         }
 
-        val service = new QuarterlyUpdateService(repository)
+        val service = new QuarterlyUpdateService(repository, executionContext)
 
         service.submit("missing-id").map { result =>
             result shouldBe Left(
@@ -93,7 +93,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(invalidDraft))
         }
 
-        val service = new QuarterlyUpdateService(repository)
+        val service = new QuarterlyUpdateService(repository, executionContext)
 
         service.submit(invalidDraft.id).map { result =>
             result shouldBe Left(
@@ -134,7 +134,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(submitted))
         }
 
-        val service = new QuarterlyUpdateService(repository)
+        val service = new QuarterlyUpdateService(repository, executionContext)
 
         service.submit(submitted.id).map { result =>
             result shouldBe Left(
@@ -167,7 +167,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(update))
         }
 
-        val service = new QuarterlyUpdateService(repository)
+        val service = new QuarterlyUpdateService(repository, executionContext)
 
         service.findById(update.id).map { result =>
             result shouldBe Right(update)
@@ -188,7 +188,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(None)
         }
 
-        val service = new QuarterlyUpdateService(repository)
+        val service = new QuarterlyUpdateService(repository, executionContext)
 
         service.findById("missing-id").map { result =>
             result shouldBe Left(
@@ -218,7 +218,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
           Future.successful(None)
       }
 
-      val service = new QuarterlyUpdateService(repository)
+      val service = new QuarterlyUpdateService(repository, executionContext)
 
       val input = validInput()
 
@@ -252,7 +252,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
           Future.successful(None)
       }
 
-      val service = new QuarterlyUpdateService(repository)
+      val service = new QuarterlyUpdateService(repository, executionContext)
 
       val input =
         validInput().copy(income = List.empty)

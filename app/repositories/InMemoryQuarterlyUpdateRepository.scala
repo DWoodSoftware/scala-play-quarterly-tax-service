@@ -2,9 +2,11 @@ package repositories
 
 import domain.QuarterlyUpdate
 
+import javax.inject.Singleton
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.Future
 
+@Singleton
 final class InMemoryQuarterlyUpdateRepository extends QuarterlyUpdateRepository {
     
     private val storage =

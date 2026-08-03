@@ -3,12 +3,15 @@ package services
 import domain.* 
 import repositories.QuarterlyUpdateRepository
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
-final class QuarterlyUpdateService(
-    repository: QuarterlyUpdateRepository
-)(using ec: ExecutionContext) {
+@Singleton
+final class QuarterlyUpdateService @Inject()(
+    repository: QuarterlyUpdateRepository,
+    ec: ExecutionContext
+){
+    private given executionContext: ExecutionContext = ec
 
     def create(
         input: QuarterlyUpdateInput
