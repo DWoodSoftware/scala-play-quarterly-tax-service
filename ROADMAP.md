@@ -478,16 +478,16 @@ Only valid drafts may transition through validation into the submitted state.
 
 Tasks:
 
-* [ ] Add failing tests for successful submission
-* [ ] Add failing tests for missing update
-* [ ] Add failing tests for invalid submission
-* [ ] Add failing tests for duplicate submission
-* [ ] Validate current state
-* [ ] Perform `Draft → Validated`
-* [ ] Perform `Validated → Submitted`
-* [ ] Set `submittedAt`
-* [ ] Persist updated entity
-* [ ] Return explicit application outcome
+* [x] Add failing tests for successful submission
+* [x] Add failing tests for missing update
+* [x] Add failing tests for invalid submission
+* [x] Add failing tests for duplicate submission
+* [x] Validate current state
+* [x] Perform `Draft → Validated`
+* [x] Perform `Validated → Submitted`
+* [x] Set `submittedAt`
+* [x] Persist updated entity
+* [x] Return explicit application outcome
 
 Contract:
 
