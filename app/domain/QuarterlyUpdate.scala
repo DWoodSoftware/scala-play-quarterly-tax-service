@@ -15,7 +15,39 @@ final case class QuarterlyUpdate private(
     netAmount: BigDecimal,
     status: SubmissionStatus,
     submittedAt: Option[Instant]
-)
+) {
+    def transitionTo(
+        next: SubmissionStatus
+    ): Either[DomainError, QuarterlyUpdate] =
+        if status.canTransitionTo(next) then
+            Right(copy(status = next))
+        
+        else
+            Left(
+                DomainError.InvalidStateTransition(
+                    current = status,
+                    requested = next
+                )
+            )
+
+    def markSubmitted(
+        submittedAt: Instant
+    ): Either[DomainError, QuarterlyUpdate] =
+        if status == SubmissionStatus.Validated then
+            Right(
+                copy(
+                    status = SubmissionStatus.Submitted,
+                    submittedAt = Some(submittedAt)
+                )
+            )
+        else
+            Left(
+                DomainError.InvalidStateTransition(
+                    current = status,
+                    requested = SubmissionStatus.Submitted
+                )
+            )
+}
 
 object QuarterlyUpdate {
 
