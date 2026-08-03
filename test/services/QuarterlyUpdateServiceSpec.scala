@@ -105,6 +105,48 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
             saveCalled shouldBe false
         }
     }
+
+    "reject an already submitted quarterly update" in {
+        val draft = QuarterlyUpdate.create(validInput())
+
+        val submitted =
+            draft
+                .transitionTo(SubmissionStatus.Validated)
+                .flatMap(_.markSubmitted(java.time.Instant.now())) match {
+                    case Right(value) => value
+                    case Left(error) => fail(s"Failed to prepare submitted fixture: $error")
+                }
+
+        var saveCalled = false
+
+        val repository = new QuarterlyUpdateRepository {
+            
+            override def save(
+                update: QuarterlyUpdate
+            ): Future[QuarterlyUpdate] = {
+                saveCalled = true
+                Future.successful(update)
+            }
+
+            override def findById(
+                id: String
+            ): Future[Option[QuarterlyUpdate]] =
+                Future.successful(Some(submitted))
+        }
+
+        val service = new QuarterlyUpdateService(repository)
+
+        service.submit(submitted.id).map { result =>
+            result shouldBe Left(
+                DomainError.InvalidStateTransition(
+                    current = SubmissionStatus.Submitted,
+                    requested = SubmissionStatus.Validated
+                )
+            )
+            
+            saveCalled shouldBe false
+        }
+    }
   }
 
   "QuarterlyUpdateService.findById" should {
