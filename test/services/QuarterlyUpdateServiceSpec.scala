@@ -45,6 +45,29 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
             }
         }
     }
+
+    "return UpdateNotFound when submitting a missing quarterly update" in {
+        val repository = new QuarterlyUpdateRepository {
+
+            override def save(
+                update: QuarterlyUpdate
+            ): Future[QuarterlyUpdate] =
+                Future.successful(update)
+
+            override def findById(
+                id: String
+            ): Future[Option[QuarterlyUpdate]] =
+                Future.successful(None)
+        }
+
+        val service = new QuarterlyUpdateService(repository)
+
+        service.submit("missing-id").map { result =>
+            result shouldBe Left(
+                DomainError.UpdateNotFound("missing-id")
+            )
+        }
+    }
   }
 
   "QuarterlyUpdateService.findById" should {
