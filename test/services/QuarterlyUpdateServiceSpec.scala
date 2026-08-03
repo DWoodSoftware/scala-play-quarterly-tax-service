@@ -9,6 +9,44 @@ import scala.concurrent.Future
 
 class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
 
+  "QuarterlyUpdateService.submit" should {
+
+    "submit a valid draft quarterly update" in {
+        val draft = QuarterlyUpdate.create(validInput())
+
+        var persisted: Option[QuarterlyUpdate] = None
+
+        val repository = new QuarterlyUpdateRepository {
+
+            override def save(
+                update: QuarterlyUpdate
+            ): Future[QuarterlyUpdate] = {
+                persisted = Some(update)
+                Future.successful(update)
+            }
+
+            override def findById(
+                id: String
+            ): Future[Option[QuarterlyUpdate]] =
+                Future.successful(Some(draft))
+        }
+
+        val service = new QuarterlyUpdateService(repository)
+
+        service.submit(draft.id).map { result =>
+            result match {
+                case Right(submitted) =>
+                    submitted.status shouldBe SubmissionStatus.Submitted
+                    submitted.submittedAt shouldBe defined
+                    persisted shouldBe Some(submitted)
+
+                case Left(error) =>
+                    fail(s"Expected successful submission, got: $error ")
+            }
+        }
+    }
+  }
+
   "QuarterlyUpdateService.findById" should {
     
     "return an existing quarterly update" in {
