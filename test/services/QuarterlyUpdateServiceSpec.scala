@@ -68,6 +68,43 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
             )
         }
     }
+
+    "return a validation failure when submitting an invalid draft" in {
+        val invalidInput =
+            validInput().copy(income = List.empty)
+
+        val invalidDraft = 
+            QuarterlyUpdate.create(invalidInput)
+
+        var saveCalled = false
+
+        val repository = new QuarterlyUpdateRepository {
+
+            override def save(
+                update: QuarterlyUpdate
+            ): Future[QuarterlyUpdate] = {
+                saveCalled = true
+                Future.successful(update)
+            }
+
+            override def findById(
+                id: String
+            ): Future[Option[QuarterlyUpdate]] =
+                Future.successful(Some(invalidDraft))
+        }
+
+        val service = new QuarterlyUpdateService(repository)
+
+        service.submit(invalidDraft.id).map { result =>
+            result shouldBe Left(
+                DomainError.ValidationFailed(
+                    List(ValidationError.MissingIncome)
+                )
+            )
+
+            saveCalled shouldBe false
+        }
+    }
   }
 
   "QuarterlyUpdateService.findById" should {
