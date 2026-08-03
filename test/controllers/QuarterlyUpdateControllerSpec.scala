@@ -47,5 +47,19 @@ class QuarterlyUpdateControllerSpec
 
             status(result) mustBe CREATED
         }
+
+        "return 400 Bad Request for malformed JSON" in {
+            val request = 
+                FakeRequest(
+                    POST,
+                    "/api/v1/quarterly-updates"
+                )
+                    .withHeaders(CONTENT_TYPE -> "application/json")
+                    .withBody("{ invalid-json}")
+
+            val result = route(app, request).get
+
+            status(result) mustBe BAD_REQUEST
+        }
     }
 }
