@@ -29,4 +29,17 @@ final class QuarterlyUpdateService(
                     .map(saved => Right(saved))
         }
     }
+
+    def findById(
+        id: String
+    ): Future[Either[DomainError, QuarterlyUpdate]] =
+        repository
+            .findById(id)
+            .map {
+                case Some(update) =>
+                    Right(update)
+            
+                case None =>
+                    Left(DomainError.UpdateNotFound(id))
+            }
 }
