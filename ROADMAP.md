@@ -518,13 +518,13 @@ POST /api/v1/quarterly-updates
 
 Tasks:
 
-* [ ] Define request JSON contract
-* [ ] Add controller test for valid request
-* [ ] Add controller test for malformed JSON
-* [ ] Add controller test for domain validation failure
-* [ ] Implement route
-* [ ] Implement thin controller action
-* [ ] Map successful creation to `201 Created`
+* [x] Define request JSON contract
+* [x] Add controller test for valid request
+* [X] Add controller test for malformed JSON
+* [X] Add controller test for domain validation failure
+* [x] Implement route
+* [x] Implement thin controller action
+* [x] Map successful creation to `201 Created`
 
 Relevant flow:
 
