@@ -46,6 +46,46 @@ final class QuarterlyUpdateController @Inject() (
             }
         }
 
+    def findById(id: String): Action[AnyContent] = Action.async {
+        service.findById(id).map {
+            case Right(update) =>
+            Ok(toJson(update))
+
+            case Left(_) =>
+            NotFound
+        }
+    }
+
+    private def toJson(
+        update: QuarterlyUpdate
+    ): JsObject =
+    Json.obj(
+        "id" -> update.id,
+        "taxpayerReference" -> update.taxpayerReference.toString,
+        "taxYear" -> Json.obj(
+        "startYear" -> update.taxYear.startYear,
+        "endYear" -> update.taxYear.endYear
+        ),
+        "quarter" -> update.quarter.toString,
+        "income" -> update.income.map { entry =>
+        Json.obj(
+            "category" -> entry.category.toString,
+            "amount" -> entry.amount
+        )
+        },
+        "expenses" -> update.expenses.map { entry =>
+        Json.obj(
+            "category" -> entry.category.toString,
+            "amount" -> entry.amount
+        )
+        },
+        "totalIncome" -> update.totalIncome,
+        "totalExpenses" -> update.totalExpenses,
+        "netAmount" -> update.netAmount,
+        "status" -> update.status.toString,
+        "submittedAt" -> update.submittedAt.map(_.toString)
+    )
+
     private def parseInput(
         json: JsValue
     ): Either[String, QuarterlyUpdateInput] =
