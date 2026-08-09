@@ -56,6 +56,29 @@ final class QuarterlyUpdateController @Inject() (
         }
     }
 
+    def submit(id: String): Action[AnyContent] = Action.async {
+        service.submit(id).map {
+            case Right(update) =>
+            Ok(toJson(update))
+
+            case Left(DomainError.UpdateNotFound(_)) =>
+            NotFound
+
+            case Left(DomainError.ValidationFailed(errors)) =>
+            UnprocessableEntity(
+                Json.obj(
+                "errors" -> errors.map(_.toString)
+                )
+            )
+
+            case Left(DomainError.InvalidStateTransition(_, _)) =>
+            Conflict
+
+            case Left(_) =>
+            InternalServerError
+        }
+    }
+
     private def toJson(
         update: QuarterlyUpdate
     ): JsObject =

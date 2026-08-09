@@ -1,3 +1,4 @@
-GET     /health                       controllers.HealthController.health
-POST    /api/v1/quarterly-updates     controllers.QuarterlyUpdateController.create
-GET     /api/v1/quarterly-updates/:id controllers.QuarterlyUpdateController.findById(id: String)
+GET     /health                                   controllers.HealthController.health
+POST    /api/v1/quarterly-updates                 controllers.QuarterlyUpdateController.create
+GET     /api/v1/quarterly-updates/:id             controllers.QuarterlyUpdateController.findById(id: String)
+POST    /api/v1/quarterly-updates/:id/submit      controllers.QuarterlyUpdateController.submit(id: String)
