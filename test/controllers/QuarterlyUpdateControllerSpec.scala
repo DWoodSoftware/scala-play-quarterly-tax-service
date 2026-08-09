@@ -134,5 +134,17 @@ class QuarterlyUpdateControllerSpec
 
             status(retrieveResult) mustBe OK
         }
+
+        "return 404 Not Found when the quarterly update does not exist" in {
+            val request =
+                FakeRequest(
+                GET,
+                "/api/v1/quarterly-updates/missing-id"
+                )
+
+            val result = route(app, request).get
+
+            status(result) mustBe NOT_FOUND
+        }
     }
 }
