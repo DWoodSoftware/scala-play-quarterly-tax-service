@@ -502,7 +502,7 @@ Relevant flow:
 
 # Phase 8 — HTTP Transport Layer
 
-**Status:** [~] In-Progress
+**Status:** [x] Complete
 
 Purpose:
 
@@ -542,12 +542,12 @@ GET /api/v1/quarterly-updates/:id
 
 Tasks:
 
-* [ ] Add successful retrieval test
-* [ ] Add missing-resource test
-* [ ] Implement route
-* [ ] Implement controller action
-* [ ] Map success to `200 OK`
-* [ ] Map missing entity to `404 Not Found`
+* [x] Add successful retrieval test
+* [x] Add missing-resource test
+* [x] Implement route
+* [x] Implement controller action
+* [x] Map success to `200 OK`
+* [x] Map missing entity to `404 Not Found`
 
 Relevant flow:
 
@@ -565,12 +565,12 @@ POST /api/v1/quarterly-updates/:id/submit
 
 Tasks:
 
-* [ ] Add successful submission test
-* [ ] Add missing-resource test
-* [ ] Add validation-failure test
-* [ ] Add illegal-transition test
-* [ ] Implement route
-* [ ] Implement thin controller action
+* [x] Add successful submission test
+* [x] Add missing-resource test
+* [x] Add validation-failure test
+* [x] Add illegal-transition test
+* [x] Implement route
+* [x] Implement thin controller action
 
 Relevant flow:
 
