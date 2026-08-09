@@ -214,7 +214,7 @@ Notes:
 
 # Phase 2 — Input and Domain Validation
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -283,7 +283,7 @@ Relevant flow:
 
 # Phase 3 — Financial Calculation
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -319,7 +319,7 @@ Relevant flow:
 
 # Phase 4 — Quarterly Update Entity
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -348,7 +348,7 @@ Relevant flow:
 
 # Phase 5 — Repository Contract
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -390,7 +390,7 @@ Relevant flow:
 
 # Phase 6 — Application Error Model
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -416,7 +416,7 @@ Relevant flow:
 
 # Phase 7 — Application Service
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -502,7 +502,7 @@ Relevant flow:
 
 # Phase 8 — HTTP Transport Layer
 
-**Status:** [ ] Planned
+**Status:** [~] In-Progress
 
 Purpose:
 
@@ -706,22 +706,27 @@ Tasks:
 
 ---
 
-# Phase 14 — Deployment
+# Phase 14 — Lightweight Demonstration UI
 
 **Status:** [ ] Planned
 
 Purpose:
 
-Expose the technical demonstration through a publicly reachable deployment.
+Provide a minimal browser-based interaction layer demonstrating the
+implemented Scala/Play quarterly reporting workflow.
 
 Tasks:
 
-* [ ] Select zero-cost hosting target
-* [ ] Deploy containerised Play service
-* [ ] Configure runtime environment
-* [ ] Verify health endpoint
-* [ ] Verify core quarterly update workflow
-* [ ] Add public demo endpoint to README
+* [ ] Add lightweight frontend entry point
+* [ ] Add quarterly update creation form
+* [ ] Display server-derived financial totals
+* [ ] Display generated update identifier and lifecycle state
+* [ ] Support retrieval of an existing update
+* [ ] Support submission of a draft update
+* [ ] Surface API validation/error responses clearly
+* [ ] Keep authentication explicitly out of scope
+* [ ] Avoid duplicating business rules in the frontend
+* [ ] Verify create → retrieve → submit through the UI
 
 ---
 
@@ -737,7 +742,6 @@ The initial project deliberately excludes:
 * Redis
 * Kafka / Pub/Sub
 * Kubernetes
-* frontend development
 * actual UK tax-liability calculations
 * production financial processing
 
