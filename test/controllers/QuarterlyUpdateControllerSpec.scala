@@ -90,4 +90,49 @@ class QuarterlyUpdateControllerSpec
             status(result) mustBe BAD_REQUEST
         }
     }
+
+    "GET /api/v1/quarterly-updates/:id" should {
+
+        "return 200 OK for an existing quarterly update" in {
+            val createBody = Json.obj(
+            "taxpayerReference" -> "TAX-12345678",
+            "taxYear" -> Json.obj(
+                "startYear" -> 2026,
+                "endYear" -> 2027
+            ),
+            "quarter" -> "Q1",
+            "income" -> Json.arr(
+                Json.obj(
+                "category" -> "SelfEmployment",
+                "amount" -> 1500.00
+                )
+            ),
+            "expenses" -> Json.arr()
+            )
+
+            val createRequest =
+            FakeRequest(
+                POST,
+                "/api/v1/quarterly-updates"
+            ).withJsonBody(createBody)
+
+            val createResult = route(app, createRequest).get
+
+            status(createResult) mustBe CREATED
+
+            val id =
+            (contentAsJson(createResult) \ "id").as[String]
+
+            val retrieveRequest =
+            FakeRequest(
+                GET,
+                s"/api/v1/quarterly-updates/$id"
+            )
+
+            val retrieveResult =
+            route(app, retrieveRequest).get
+
+            status(retrieveResult) mustBe OK
+        }
+    }
 }
