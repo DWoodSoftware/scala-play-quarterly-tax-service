@@ -151,6 +151,13 @@ class QuarterlyUpdateControllerSpec
             val result = route(app, request).get
 
             status(result) mustBe NOT_FOUND
+
+            contentAsJson(result) mustBe Json.obj(
+                "error" -> Json.obj(
+                    "code" -> "UPDATE_NOT_FOUND",
+                    "message" -> "Quarterly update was not found"
+                )
+            )
         }
     }
 
