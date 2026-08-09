@@ -1,5 +1,11 @@
 package controllers
 
+import domain.* 
+import repositories.QuarterlyUpdateRepository
+import services.QuarterlyUpdateService
+
+import scala.concurrent.{ExecutionContext, Future}
+
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.libs.json.Json
@@ -203,6 +209,68 @@ class QuarterlyUpdateControllerSpec
             val result = route(app, request).get
 
             status(result) mustBe NOT_FOUND
+        }
+
+        "return 422 Unprocessable Entity when submission validation fails" in {
+            val taxpayerReference =
+                TaxpayerReference.create("TAX-12345678") match {
+                    case Right(value) => value
+                    case Left(error) => fail(error)
+                }
+
+            val taxYear =
+                TaxYear.create(2026, 2027) match {
+                    case Right(value) => value
+                    case Left(error) => fail(error)
+                }
+
+            val invalidInput =
+                QuarterlyUpdateInput(
+                    taxpayerReference = taxpayerReference,
+                    taxYear = taxYear,
+                    quarter = Quarter.Q1,
+                    income = List.empty,
+                    expenses = List.empty
+                )
+
+            val invalidDraft =
+                QuarterlyUpdate.create(invalidInput)
+
+            val repository = new QuarterlyUpdateRepository {
+
+                override def save(
+                    update: QuarterlyUpdate
+                ): Future[QuarterlyUpdate] =
+                    Future.successful(update)
+
+                override def findById(
+                    id: String
+                ): Future[Option[QuarterlyUpdate]] =
+                    Future.successful(Some(invalidDraft))
+            }
+
+            val service =
+                new QuarterlyUpdateService(
+                    repository,
+                    ExecutionContext.global
+                )
+
+            val controller =
+                new QuarterlyUpdateController(
+                    stubControllerComponents(),
+                    service
+                )(using ExecutionContext.global)
+
+            val request =
+                FakeRequest(
+                    POST,
+                    s"/api/v1/quarterly-updates/${invalidDraft.id}/submit"
+                )
+
+            val result =
+                controller.submit(invalidDraft.id)(request)
+
+            status(result) mustBe UNPROCESSABLE_ENTITY
         }
     }
 }
