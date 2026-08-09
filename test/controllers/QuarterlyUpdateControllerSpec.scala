@@ -45,6 +45,16 @@ class QuarterlyUpdateControllerSpec
             val result = route(app, request).get
 
             status(result) mustBe UNPROCESSABLE_ENTITY
+
+            contentAsJson(result) mustBe Json.obj(
+                "error" -> Json.obj(
+                    "code" -> "VALIDATION_FAILED",
+                    "message" -> "Quarterly update validation failed.",
+                    "details" -> Json.arr(
+                        "MissingIncome"
+                    )
+                )
+            )
         }
 
         "return 201 Created for a valid quarterly update request" in {
