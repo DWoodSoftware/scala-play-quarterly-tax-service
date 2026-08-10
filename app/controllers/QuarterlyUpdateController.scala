@@ -36,7 +36,11 @@ final class QuarterlyUpdateController @Inject() (
                         case Left(DomainError.ValidationFailed(errors)) =>
                             UnprocessableEntity(
                                 Json.obj(
-                                    "errors" -> errors.map(_.toString)
+                                    "error" -> Json.obj(
+                                        "code" -> "VALIDATION_FAILED",
+                                        "message" -> "Quarterly update validation failed.",
+                                        "details" -> errors.map(_.toString)
+                                    )
                                 )
                             )
 
@@ -86,9 +90,6 @@ final class QuarterlyUpdateController @Inject() (
 
             case Left(DomainError.InvalidStateTransition(_, _)) =>
             Conflict
-
-            case Left(_) =>
-            InternalServerError
         }
     }
 
