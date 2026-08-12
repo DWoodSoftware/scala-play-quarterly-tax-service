@@ -51,27 +51,38 @@ final class QuarterlyUpdateController @Inject() (
         }
 
     def findById(id: String): Action[AnyContent] = Action.async {
-        service.findById(id).map {
-            case Right(update) =>
-                Ok(toJson(update))
+        service.findById(id)
+            .map {
+                case Right(update) =>
+                    Ok(toJson(update))
 
-            case Left(DomainError.UpdateNotFound(_)) =>
-                NotFound(
-                    errorResponse(
-                        code = "UPDATE_NOT_FOUND",
-                        message = "Quarterly update was not found"
+                case Left(DomainError.UpdateNotFound(_)) =>
+                    NotFound(
+                        errorResponse(
+                            code = "UPDATE_NOT_FOUND",
+                            message = "Quarterly update was not found"
+                        )
                     )
-                )
 
-            case Left(_) =>
-                InternalServerError(
+                case Left(DomainError.ValidationFailed(_)) |
+                    Left(DomainError.InvalidStateTransition(_, _)) =>
+                  InternalServerError(
                     errorResponse(
                         code = "INTERNAL_SERVER_ERROR",
                         message = "An unexpected error occurred"
                     )
-                )
+                  )
+            }
+            .recover {
+                case _ =>
+                    InternalServerError(
+                        errorResponse(
+                            code = "INTERNAL_SERVER_ERROR",
+                            message = "An unexpected error occurred"
+                        )
+                    )
+            }
         }
-    }
 
     def submit(id: String): Action[AnyContent] = Action.async {
         service.submit(id).map {
