@@ -6,7 +6,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsArray, JsObject, Json}
 import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Injecting}
 import repositories.QuarterlyUpdateRepository
@@ -36,29 +36,35 @@ class QuarterlyUpdateLifecycleSpec
       Future.successful(None)
   }
 
+  private def validQuarterlyUpdateJson(
+    income: JsArray = Json.arr(
+        Json.obj(
+            "category" -> "SelfEmployment",
+            "amount" -> 1500.00
+        )
+        ),
+        expenses: JsArray = Json.arr(
+            Json.obj(
+                "category" -> "OfficeCosts",
+                "amount" -> 250.00
+            )
+        )
+    ): JsObject =
+    Json.obj(
+        "taxpayerReference" -> "TAX-12345678",
+        "taxYear" -> Json.obj(
+        "startYear" -> 2026,
+        "endYear" -> 2027
+        ),
+        "quarter" -> "Q1",
+        "income" -> income,
+        "expenses" -> expenses
+    )
+
   "Quarterly update lifecycle" should {
 
     "create and then retrieve the same quarterly update" in {
-      val requestBody = Json.obj(
-        "taxpayerReference" -> "TAX-12345678",
-        "taxYear" -> Json.obj(
-          "startYear" -> 2026,
-          "endYear" -> 2027
-        ),
-        "quarter" -> "Q1",
-        "income" -> Json.arr(
-          Json.obj(
-            "category" -> "SelfEmployment",
-            "amount" -> 1500.00
-          )
-        ),
-        "expenses" -> Json.arr(
-          Json.obj(
-            "category" -> "OfficeCosts",
-            "amount" -> 250.00
-          )
-        )
-      )
+      val requestBody = validQuarterlyUpdateJson()
 
       val createResult =
         route(
@@ -99,21 +105,7 @@ class QuarterlyUpdateLifecycleSpec
     }
 
     "create and then submit a quarterly update" in {
-        val requestBody = Json.obj(
-            "taxpayerReference" -> "TAX-12345678",
-            "taxYear" -> Json.obj(
-            "startYear" -> 2026,
-            "endYear" -> 2027
-            ),
-            "quarter" -> "Q1",
-            "income" -> Json.arr(
-            Json.obj(
-                "category" -> "SelfEmployment",
-                "amount" -> 1500.00
-            )
-            ),
-            "expenses" -> Json.arr()
-        )
+        val requestBody = validQuarterlyUpdateJson(expenses = Json.arr())
 
         val createResult =
             route(
@@ -149,21 +141,7 @@ class QuarterlyUpdateLifecycleSpec
     }
 
     "reject duplicate submission without changing the submitted update" in {
-      val requestBody = Json.obj(
-        "taxpayerReference" -> "TAX-12345678",
-        "taxYear" -> Json.obj(
-          "startYear" -> 2026,
-          "endYear" -> 2027
-        ),
-        "quarter" -> "Q1",
-        "income" -> Json.arr(
-          Json.obj(
-            "category" -> "SelfEmployment",
-            "amount" -> 1500.00
-          )
-        ),
-        "expenses" -> Json.arr()
-      )
+      val requestBody = validQuarterlyUpdateJson(expenses = Json.arr())
 
       val createResult =
         route(
@@ -227,16 +205,11 @@ class QuarterlyUpdateLifecycleSpec
           )
           .build()
 
-      val requestBody = Json.obj(
-        "taxpayerReference" -> "TAX-12345678",
-        "taxYear" -> Json.obj(
-          "startYear" -> 2026,
-          "endYear" -> 2027
-        ),
-        "quarter" -> "Q1",
-        "income" -> Json.arr(),
-        "expenses" -> Json.arr()
-      )
+      val requestBody = 
+        validQuarterlyUpdateJson(
+            income = Json.arr(),
+            expenses = Json.arr()
+        )
 
       val result =
         route(
@@ -252,35 +225,29 @@ class QuarterlyUpdateLifecycleSpec
     }
 
     "calculate derived financial values server-side" in {
-      val requestBody = Json.obj(
-        "taxpayerReference" -> "TAX-12345678",
-        "taxYear" -> Json.obj(
-          "startYear" -> 2026,
-          "endYear" -> 2027
-        ),
-        "quarter" -> "Q1",
-        "income" -> Json.arr(
-          Json.obj(
-            "category" -> "SelfEmployment",
-            "amount" -> 2000.00
-          ),
-          Json.obj(
-            "category" -> "Other",
-            "amount" -> 500.00
-          )
-        ),
-        "expenses" -> Json.arr(
-          Json.obj(
-            "category" -> "OfficeCosts",
-            "amount" -> 300.00
-          )
-        ),
-
-        // Malicious/incorrect client-supplied derived values
-        "totalIncome" -> 999999.00,
-        "totalExpenses" -> 999999.00,
-        "netAmount" -> 999999.00
-      )
+      val requestBody =
+        validQuarterlyUpdateJson(
+            income = Json.arr(
+            Json.obj(
+                "category" -> "SelfEmployment",
+                "amount" -> 2000.00
+            ),
+            Json.obj(
+                "category" -> "Other",
+                "amount" -> 500.00
+            )
+            ),
+            expenses = Json.arr(
+            Json.obj(
+                "category" -> "OfficeCosts",
+                "amount" -> 300.00
+            )
+            )
+        ) ++ Json.obj(
+            "totalIncome" -> 999999.00,
+            "totalExpenses" -> 999999.00,
+            "netAmount" -> 999999.00
+        )
 
       val createResult =
         route(
