@@ -15,6 +15,38 @@ final class QuarterlyUpdateController @Inject() (
 )(using ev: ExecutionContext)
     extends AbstractController(cc) {
 
+    private def domainErrorResult(
+        error: DomainError
+    ): Result = 
+        error match {
+            case DomainError.ValidationFailed(errors) =>
+                UnprocessableEntity(
+                    Json.obj(
+                        "error" -> Json.obj(
+                            "code" -> "VALIDATION_FAILED",
+                            "message" -> "Quarterly update validation failed.",
+                            "details" -> errors.map(_.toString)
+                        )
+                    )
+                )
+
+            case DomainError.UpdateNotFound(_) =>
+                NotFound(
+                    errorResponse(
+                        code = "UPDATE_NOT_FOUND",
+                        message = "Quarterly update was not found"
+                    )
+                )
+
+            case DomainError.InvalidStateTransition(_, _) =>
+                Conflict(
+                    errorResponse(
+                        code = "INVALID_STATE_TRANSITION",
+                        message = "Quarterly update cannot transition from its current state"
+                    )
+                )
+        }
+
     def create : Action[JsValue] =
         Action.async(parse.json) { request =>
             parseInput(request.body) match{
@@ -33,19 +65,8 @@ final class QuarterlyUpdateController @Inject() (
                                 )
                             )
 
-                        case Left(DomainError.ValidationFailed(errors)) =>
-                            UnprocessableEntity(
-                                Json.obj(
-                                    "error" -> Json.obj(
-                                        "code" -> "VALIDATION_FAILED",
-                                        "message" -> "Quarterly update validation failed.",
-                                        "details" -> errors.map(_.toString)
-                                    )
-                                )
-                            )
-
-                        case Left(_) =>
-                            InternalServerError
+                        case Left(error) =>
+                            domainErrorResult(error)
                     }
             }
         }
@@ -56,57 +77,28 @@ final class QuarterlyUpdateController @Inject() (
                 case Right(update) =>
                     Ok(toJson(update))
 
-                case Left(DomainError.UpdateNotFound(_)) =>
-                    NotFound(
-                        errorResponse(
-                            code = "UPDATE_NOT_FOUND",
-                            message = "Quarterly update was not found"
-                        )
-                    )
-
-                case Left(DomainError.ValidationFailed(_)) |
-                    Left(DomainError.InvalidStateTransition(_, _)) =>
-                  InternalServerError(
-                    errorResponse(
-                        code = "INTERNAL_SERVER_ERROR",
-                        message = "An unexpected error occurred"
-                    )
-                  )
+                case Left(error) =>
+                    domainErrorResult(error)
             }
             .recover {
                 case _ =>
-                    InternalServerError(
-                        errorResponse(
-                            code = "INTERNAL_SERVER_ERROR",
-                            message = "An unexpected error occurred"
-                        )
-                    )
+                    internalServerErrorResult
             }
         }
 
     def submit(id: String): Action[AnyContent] = Action.async {
-        service.submit(id).map {
+        service.submit(id)
+          .map {
             case Right(update) =>
-            Ok(toJson(update))
+                Ok(toJson(update))
 
-            case Left(DomainError.UpdateNotFound(_)) =>
-            NotFound
-
-            case Left(DomainError.ValidationFailed(errors)) =>
-            UnprocessableEntity(
-                Json.obj(
-                "errors" -> errors.map(_.toString)
-                )
-            )
-
-            case Left(DomainError.InvalidStateTransition(_, _)) =>
-                Conflict(
-                    errorResponse(
-                        code = "INVALID_STATE_TRANSITION",
-                        message = "Quarterly update cannot transition from its current state"
-                    )
-                )
-        }
+            case Left(error) =>
+                domainErrorResult(error)
+          }
+          .recover {
+            case _ =>
+                internalServerErrorResult
+          }
     }
 
     private def errorResponse(
@@ -119,6 +111,14 @@ final class QuarterlyUpdateController @Inject() (
         "message" -> message
         )
     )
+
+    private def internalServerErrorResult: Result =
+        InternalServerError(
+            errorResponse(
+            code = "INTERNAL_SERVER_ERROR",
+            message = "An unexpected error occurred"
+            )
+        )
 
     private def toJson(
         update: QuarterlyUpdate
