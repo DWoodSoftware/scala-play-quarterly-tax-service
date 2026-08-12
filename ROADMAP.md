@@ -624,12 +624,12 @@ Compose controllers, services, validators, and repositories through explicit dep
 
 Tasks:
 
-* [ ] Configure constructor dependency injection
-* [ ] Bind repository abstraction to in-memory implementation
-* [ ] Verify service depends on repository trait
-* [ ] Verify controller depends on service abstraction where appropriate
-* [ ] Remove accidental global state
-* [ ] Ensure components remain independently testable
+* [x] Configure constructor dependency injection
+* [x] Bind repository abstraction to in-memory implementation
+* [x] Verify service depends on repository trait
+* [x] Verify controller depends on service abstraction where appropriate
+* [x] Remove accidental global state
+* [x] Ensure components remain independently testable
 
 Relevant flow:
 
