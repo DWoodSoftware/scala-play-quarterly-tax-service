@@ -342,6 +342,13 @@ class QuarterlyUpdateControllerSpec
                 ).get
 
             status(secondSubmission) mustBe CONFLICT
+
+            contentAsJson(secondSubmission) mustBe Json.obj(
+                "error" -> Json.obj(
+                    "code" -> "INVALID_STATE_TRANSITION",
+                    "message" -> "Quarterly update cannot transition from its current state"
+                )
+            )
         }
     }
 }
