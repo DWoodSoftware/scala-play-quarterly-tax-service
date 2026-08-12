@@ -89,7 +89,12 @@ final class QuarterlyUpdateController @Inject() (
             )
 
             case Left(DomainError.InvalidStateTransition(_, _)) =>
-            Conflict
+                Conflict(
+                    errorResponse(
+                        code = "INVALID_STATE_TRANSITION",
+                        message = "Quarterly update cannot transition from its current state"
+                    )
+                )
         }
     }
 
