@@ -72,5 +72,72 @@ class QuarterlyUpdateLifecycleSpec
       (retrieved \ "totalExpenses").as[BigDecimal] mustBe BigDecimal("250.00")
       (retrieved \ "netAmount").as[BigDecimal] mustBe BigDecimal("1250.00")
     }
+
+    "reject duplicate submission without changing the submitted update" in {
+        val requestBody = Json.obj(
+            "taxpayerReference" -> "TAX-12345678",
+            "taxYear" -> Json.obj(
+            "startYear" -> 2026,
+            "endYear" -> 2027
+            ),
+            "quarter" -> "Q1",
+            "income" -> Json.arr(
+            Json.obj(
+                "category" -> "SelfEmployment",
+                "amount" -> 1500.00
+            )
+            ),
+            "expenses" -> Json.arr()
+        )
+
+        val createResult =
+            route(
+            app,
+            FakeRequest(
+                POST,
+                "/api/v1/quarterly-updates"
+            ).withJsonBody(requestBody)
+            ).get
+
+        status(createResult) mustBe CREATED
+
+        val id =
+            (contentAsJson(createResult) \ "id").as[String]
+
+        val firstSubmitResult =
+            route(
+            app,
+            FakeRequest(
+                POST,
+                s"/api/v1/quarterly-updates/$id/submit"
+            )
+            ).get
+
+        status(firstSubmitResult) mustBe OK
+        (contentAsJson(firstSubmitResult) \ "status").as[String] mustBe "Submitted"
+
+        val secondSubmitResult =
+            route(
+            app,
+            FakeRequest(
+                POST,
+                s"/api/v1/quarterly-updates/$id/submit"
+            )
+            ).get
+
+        status(secondSubmitResult) mustBe CONFLICT
+
+        val retrieveResult =
+            route(
+            app,
+            FakeRequest(
+                GET,
+                s"/api/v1/quarterly-updates/$id"
+            )
+            ).get
+
+        status(retrieveResult) mustBe OK
+        (contentAsJson(retrieveResult) \ "status").as[String] mustBe "Submitted"
+        }
   }
 }
