@@ -108,6 +108,52 @@ class QuarterlyUpdateControllerSpec
     }
 
     "GET /api/v1/quarterly-updates/:id" should {
+        "return 500 Internal Server Error when the repository fails unexpectedly" in {
+            val repository = new QuarterlyUpdateRepository {
+
+                override def save(
+                    update: QuarterlyUpdate
+                ): Future[QuarterlyUpdate] =
+                    Future.successful(update)
+
+                override def findById(
+                    id: String
+                ): Future[Option[QuarterlyUpdate]] =
+                    Future.failed(
+                        new RuntimeException("repository unavailable")
+                    )
+            }
+
+            val service =
+                new QuarterlyUpdateService(
+                    repository,
+                    ExecutionContext.global
+                )
+
+            val controller =
+                new QuarterlyUpdateController(
+                    stubControllerComponents(),
+                    service
+                )(using ExecutionContext.global)
+
+            val request =
+                FakeRequest(
+                    GET,
+                    "/api/v1/quarterly-updates/failing-id"
+                )
+
+            val result =
+                controller.findById("failing-id")(request)
+
+            status(result) mustBe INTERNAL_SERVER_ERROR
+
+            contentAsJson(result) mustBe Json.obj(
+                "error" -> Json.obj(
+                    "code" -> "INTERNAL_SERVER_ERROR",
+                    "message" -> "An unexpected error occurred"
+                )
+            )
+        }
 
         "return 200 OK for an existing quarterly update" in {
             val createBody = Json.obj(
