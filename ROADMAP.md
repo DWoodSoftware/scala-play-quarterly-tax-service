@@ -598,10 +598,10 @@ Unexpected infrastructure error → 500 Internal Server Error
 
 Tasks:
 
-* [ ] Define JSON error response format
-* [ ] Add controller tests for each mapping
-* [ ] Centralise mapping where appropriate
-* [ ] Prevent domain types from depending on Play HTTP types
+* [x] Define JSON error response format
+* [x] Add controller tests for each mapping
+* [x] Centralise mapping where appropriate
+* [x] Prevent domain types from depending on Play HTTP types
 
 Relevant flow:
 
