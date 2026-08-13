@@ -7,12 +7,15 @@ import repositories.QuarterlyUpdateRepository
 
 import scala.concurrent.Future
 
+import support.DomainFixtures.*
+
 class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
 
   "QuarterlyUpdateService.submit" should {
 
     "submit a valid draft quarterly update" in {
-        val draft = QuarterlyUpdate.create(validInput())
+        val draft = 
+            QuarterlyUpdate.create(validQuarterlyUpdateInput())
 
         var persisted: Option[QuarterlyUpdate] = None
 
@@ -31,7 +34,11 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(draft))
         }
 
-        val service = new QuarterlyUpdateService(repository, executionContext)
+        val service = 
+            new QuarterlyUpdateService(
+                repository, 
+                executionContext
+            )
 
         service.submit(draft.id).map { result =>
             result match {
@@ -41,7 +48,9 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                     persisted shouldBe Some(submitted)
 
                 case Left(error) =>
-                    fail(s"Expected successful submission, got: $error ")
+                    fail(
+                        s"Expected successful submission, got: $error "
+                    )
             }
         }
     }
@@ -60,7 +69,11 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(None)
         }
 
-        val service = new QuarterlyUpdateService(repository, executionContext)
+        val service = 
+            new QuarterlyUpdateService(
+                repository, 
+                executionContext
+            )
 
         service.submit("missing-id").map { result =>
             result shouldBe Left(
@@ -71,7 +84,8 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
 
     "return a validation failure when submitting an invalid draft" in {
         val invalidInput =
-            validInput().copy(income = List.empty)
+        validQuarterlyUpdateInput()
+            .copy(income = List.empty)
 
         val invalidDraft = 
             QuarterlyUpdate.create(invalidInput)
@@ -93,7 +107,11 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(invalidDraft))
         }
 
-        val service = new QuarterlyUpdateService(repository, executionContext)
+        val service = 
+            new QuarterlyUpdateService(
+                repository, 
+                executionContext
+            )
 
         service.submit(invalidDraft.id).map { result =>
             result shouldBe Left(
@@ -107,15 +125,23 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
     }
 
     "reject an already submitted quarterly update" in {
-        val draft = QuarterlyUpdate.create(validInput())
+        val draft = 
+            QuarterlyUpdate.create(validQuarterlyUpdateInput())
 
         val submitted =
             draft
                 .transitionTo(SubmissionStatus.Validated)
-                .flatMap(_.markSubmitted(java.time.Instant.now())) match {
-                    case Right(value) => value
-                    case Left(error) => fail(s"Failed to prepare submitted fixture: $error")
-                }
+                .flatMap(
+                    _.markSubmitted(java.time.Instant.now())
+                ) match {
+                case Right(value) => 
+                    value
+
+                case Left(error) => 
+                    fail(
+                        s"Failed to prepare submitted fixture: $error"
+                    )
+            }
 
         var saveCalled = false
 
@@ -134,7 +160,11 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(submitted))
         }
 
-        val service = new QuarterlyUpdateService(repository, executionContext)
+        val service = 
+            new QuarterlyUpdateService(
+                repository, 
+                executionContext
+            )
 
         service.submit(submitted.id).map { result =>
             result shouldBe Left(
@@ -152,7 +182,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
   "QuarterlyUpdateService.findById" should {
     
     "return an existing quarterly update" in {
-        val update = QuarterlyUpdate.create(validInput())
+        val update = QuarterlyUpdate.create(validQuarterlyUpdateInput())
 
         val repository = new QuarterlyUpdateRepository {
             
@@ -167,7 +197,11 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(Some(update))
         }
 
-        val service = new QuarterlyUpdateService(repository, executionContext)
+        val service = 
+            new QuarterlyUpdateService(
+                repository, 
+                executionContext
+            )
 
         service.findById(update.id).map { result =>
             result shouldBe Right(update)
@@ -188,7 +222,11 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
                 Future.successful(None)
         }
 
-        val service = new QuarterlyUpdateService(repository, executionContext)
+        val service = 
+            new QuarterlyUpdateService(
+                repository, 
+                executionContext
+            )
 
         service.findById("missing-id").map { result =>
             result shouldBe Left(
@@ -218,9 +256,14 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
           Future.successful(None)
       }
 
-      val service = new QuarterlyUpdateService(repository, executionContext)
+      val service = 
+        new QuarterlyUpdateService(
+            repository, 
+            executionContext
+        )
 
-      val input = validInput()
+      val input = 
+        validQuarterlyUpdateInput()
 
       service.create(input).map { result =>
         result match {
@@ -229,7 +272,9 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
             persisted shouldBe Some(update)
 
           case Left(error) =>
-            fail(s"Expected successful creation, got: $error")
+            fail(
+                s"Expected successful creation, got: $error"
+            )
         }
       }
     }
@@ -252,10 +297,15 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
           Future.successful(None)
       }
 
-      val service = new QuarterlyUpdateService(repository, executionContext)
+      val service = 
+        new QuarterlyUpdateService(
+            repository, 
+            executionContext
+        )
 
       val input =
-        validInput().copy(income = List.empty)
+        validQuarterlyUpdateInput()
+            .copy(income = List.empty)
 
       service.create(input).map { result =>
         result shouldBe Left(
@@ -267,36 +317,5 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
         saveCalled shouldBe false
       }
     }
-  }
-
-  private def validInput(): QuarterlyUpdateInput = {
-    val taxpayerReference =
-      TaxpayerReference.create("TAX-12345678") match {
-        case Right(value) => value
-        case Left(error)  => fail(error)
-      }
-
-    val taxYear =
-      TaxYear.create(2026, 2027) match {
-        case Right(value) => value
-        case Left(error)  => fail(error)
-      }
-
-    val income =
-      IncomeEntry.create(
-        IncomeCategory.SelfEmployment,
-        BigDecimal("1500.00")
-      ) match {
-        case Right(value) => value
-        case Left(error)  => fail(error)
-      }
-
-    QuarterlyUpdateInput(
-      taxpayerReference = taxpayerReference,
-      taxYear = taxYear,
-      quarter = Quarter.Q1,
-      income = List(income),
-      expenses = List.empty
-    )
   }
 }

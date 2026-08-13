@@ -12,6 +12,8 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Injecting}
 
+import support.DomainFixtures.*
+
 class QuarterlyUpdateControllerSpec 
     extends PlaySpec 
     with GuiceOneAppPerTest
@@ -275,23 +277,8 @@ class QuarterlyUpdateControllerSpec
         }
 
         "return 422 Unprocessable Entity when submission validation fails" in {
-            val taxpayerReference =
-                TaxpayerReference.create("TAX-12345678") match {
-                    case Right(value) => value
-                    case Left(error) => fail(error)
-                }
-
-            val taxYear =
-                TaxYear.create(2026, 2027) match {
-                    case Right(value) => value
-                    case Left(error) => fail(error)
-                }
-
-            val invalidInput =
-                QuarterlyUpdateInput(
-                    taxpayerReference = taxpayerReference,
-                    taxYear = taxYear,
-                    quarter = Quarter.Q1,
+            val invalidInput = 
+                validQuarterlyUpdateInput(
                     income = List.empty,
                     expenses = List.empty
                 )
