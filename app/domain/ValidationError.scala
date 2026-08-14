@@ -1,5 +1,5 @@
 package domain
 
 enum ValidationError {
-    case MissingIncome
+  case MissingIncome
 }

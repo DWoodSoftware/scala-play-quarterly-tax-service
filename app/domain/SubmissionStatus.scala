@@ -5,8 +5,8 @@ enum SubmissionStatus:
   case Validated
   case Submitted
 
-  def canTransitionTo(next: SubmissionStatus): Boolean = 
+  def canTransitionTo(next: SubmissionStatus): Boolean =
     (this, next) match
-        case (Draft, Validated) => true
-        case (Validated, Submitted) => true
-        case _ => false
+      case (Draft, Validated)     => true
+      case (Validated, Submitted) => true
+      case _                      => false
