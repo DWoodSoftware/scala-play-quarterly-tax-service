@@ -1,0 +1,14 @@
+.git
+.github
+.bsp
+.metals
+.vscode
+target
+project/target
+project/project
+*.log
+README.md
+ROADMAP.md
+DOCUMENTATION.md
+APPFLOW.md
+TYPES.md
