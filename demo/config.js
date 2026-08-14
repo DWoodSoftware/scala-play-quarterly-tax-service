@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  apiBaseUrl: "http://localhost:9000"
+  apiBaseUrl: "https://scala-play-quarterly-tax-service.onrender.com"
 }
