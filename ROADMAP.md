@@ -690,7 +690,7 @@ sbt test
 
 # Phase 13 — Containerisation
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -702,7 +702,7 @@ Tasks:
 * [x] Prefer multi-stage build
 * [x] Verify container build
 * [x] Verify `GET /health` inside container
-* [ ] Document local container execution
+* [x] Document local container execution
 
 ---
 
