@@ -1,5 +1,7 @@
 # scala-play-quarterly-tax-service
 
+[![Scala Tests](https://github.com/DWoodSoftware/scala-play-quarterly-tax-service/actions/workflows/scala-tests.yml/badge.svg)](https://github.com/DWoodSoftware/scala-play-quarterly-tax-service/actions/workflows/scala-tests.yml)
+
 A Scala 3 and Play Framework portfolio project for a fictional quarterly tax reporting service. This repository is an independent technical demonstration using entirely fictional data and is not affiliated with HMRC or any government organisation.
 
 ## What this project is
