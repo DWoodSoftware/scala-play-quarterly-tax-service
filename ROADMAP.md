@@ -580,7 +580,7 @@ Relevant flow:
 
 # Phase 9 — HTTP Error Translation
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -616,7 +616,7 @@ Relevant contracts:
 
 # Phase 10 — Dependency Injection and Composition
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -639,7 +639,7 @@ Relevant flow:
 
 # Phase 11 — Integration and Behavioural Coverage
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -647,13 +647,13 @@ Verify the complete application flow across Play routing, service behaviour, dom
 
 Tasks:
 
-* [ ] Test create → retrieve lifecycle
-* [ ] Test create → submit lifecycle
-* [ ] Test duplicate submission behaviour
-* [ ] Test validation failures do not persist invalid entities
-* [ ] Test derived financial values are calculated server-side
-* [ ] Test expected HTTP status mappings
-* [ ] Review test duplication and refactor fixtures/builders
+* [x] Test create → retrieve lifecycle
+* [x] Test create → submit lifecycle
+* [x] Test duplicate submission behaviour
+* [x] Test validation failures do not persist invalid entities
+* [x] Test derived financial values are calculated server-side
+* [x] Test expected HTTP status mappings
+* [x] Review test duplication and refactor fixtures/builders
 
 Relevant flow:
 
