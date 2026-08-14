@@ -50,6 +50,66 @@ Then open:
 
 - http://localhost:9000/health
 
+## Running with Docker
+
+The service is packaged as a multi-stage Docker image and runs using the
+production Play distribution.
+
+### Build
+
+```bash
+docker build -t quarterly-tax-service:local .
+```
+
+### Run locally
+
+```bash
+docker run --rm \
+  -p 9000:9000 \
+  --name quarterly-tax-service \
+  quarterly-tax-service:local
+```
+
+The container entrypoint automatically generates an ephemeral application
+secret for local execution when `APPLICATION_SECRET` is not provided.
+
+This allows the same startup command to be used across Windows, macOS, and
+Linux without requiring host-specific secret-generation scripts.
+
+The service is available on port `9000`.
+
+### Verify
+
+```bash
+curl http://localhost:9000/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "UP"
+}
+```
+
+### Production configuration
+
+Automatic secret generation is intended for local execution only.
+
+When running with `APP_ENV=production`, an application secret must be
+provided explicitly:
+
+```bash
+docker run --rm \
+  -p 9000:9000 \
+  -e APP_ENV=production \
+  -e APPLICATION_SECRET="<secure-secret>" \
+  quarterly-tax-service:local
+```
+
+The container will refuse to start in production mode without
+`APPLICATION_SECRET`.
+
 ## Running tests
 
 Run the test suite:

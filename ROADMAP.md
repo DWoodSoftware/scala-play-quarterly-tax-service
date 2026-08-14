@@ -698,10 +698,10 @@ Produce a reproducible runnable application artifact.
 
 Tasks:
 
-* [ ] Add Dockerfile
-* [ ] Prefer multi-stage build
-* [ ] Verify container build
-* [ ] Verify `GET /health` inside container
+* [x] Add Dockerfile
+* [x] Prefer multi-stage build
+* [x] Verify container build
+* [x] Verify `GET /health` inside container
 * [ ] Document local container execution
 
 ---
