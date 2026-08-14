@@ -10,9 +10,10 @@ import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Injecting}
+import play.api.test.Injecting
 
 import support.DomainFixtures.*
+import support.HttpFixtures.*
 
 class QuarterlyUpdateControllerSpec 
     extends PlaySpec 
@@ -22,27 +23,13 @@ class QuarterlyUpdateControllerSpec
     "POST /api/v1/quarterly-updates" should {
 
         "return 422 Unprocessable Entity when domain validation fails" in {
-            val requestBody = Json.obj(
-                "taxpayerReference" -> "TAX-12345678",
-                "taxYear" -> Json.obj(
-                    "startYear" -> 2026,
-                    "endYear" -> 2027
-                ),
-                "quarter" -> "Q1",
-                "income" -> Json.arr(),
-                "expenses" -> Json.arr(
-                    Json.obj(
-                        "category" -> "OfficeCosts",
-                        "amount" -> 250.00
-                    )
+            val requestBody = 
+                validQuarterlyUpdateJson(
+                    income = Json.arr()
                 )
-            )
 
             val request =
-                FakeRequest(
-                    POST,
-                    "/api/v1/quarterly-updates"
-                ).withJsonBody(requestBody)
+                createQuarterlyUpdateRequest(requestBody)
 
             val result = route(app, request).get
 
@@ -60,50 +47,20 @@ class QuarterlyUpdateControllerSpec
         }
 
         "return 201 Created for a valid quarterly update request" in {
-
-            val requestBody = Json.obj(
-                "taxpayerReference" -> "TAX-12345678",
-                "taxYear" -> Json.obj(
-                    "startYear" -> 2026,
-                    "endYear" -> 2027
-                ),
-                "quarter" -> "Q1",
-                "income" -> Json.arr(
-                    Json.obj(
-                        "category" -> "SelfEmployment",
-                        "amount" -> 1500.00
-                    )
-                ),
-                "expenses" -> Json.arr(
-                    Json.obj(
-                        "category" -> "OfficeCosts",
-                        "amount" -> 250.00
-                    )
-                )
-            )
-
-            val request =
-                FakeRequest(
-                    POST,
-                    "/api/v1/quarterly-updates"
-                ).withJsonBody(requestBody)
-
             val result =
-                route(app, request).get
+                route(
+                    app, 
+                    createQuarterlyUpdateRequest()
+                ).get
 
             status(result) mustBe CREATED
         }
 
         "return 400 Bad Request for malformed JSON" in {
-            val request = 
-                FakeRequest(
-                    POST,
-                    "/api/v1/quarterly-updates"
-                )
-                    .withHeaders(CONTENT_TYPE -> "application/json")
-                    .withBody("{ invalid-json}")
-
-            val result = route(app, request).get
+            val result = route(
+                app, 
+                malformedQuarterlyUpdateRequest
+            ).get
 
             status(result) mustBe BAD_REQUEST
         }
@@ -139,10 +96,7 @@ class QuarterlyUpdateControllerSpec
                 )(using ExecutionContext.global)
 
             val request =
-                FakeRequest(
-                    GET,
-                    "/api/v1/quarterly-updates/failing-id"
-                )
+                retrieveQuarterlyUpdateRequest("failing-id")
 
             val result =
                 controller.findById("failing-id")(request)
@@ -158,55 +112,36 @@ class QuarterlyUpdateControllerSpec
         }
 
         "return 200 OK for an existing quarterly update" in {
-            val createBody = Json.obj(
-            "taxpayerReference" -> "TAX-12345678",
-            "taxYear" -> Json.obj(
-                "startYear" -> 2026,
-                "endYear" -> 2027
-            ),
-            "quarter" -> "Q1",
-            "income" -> Json.arr(
-                Json.obj(
-                "category" -> "SelfEmployment",
-                "amount" -> 1500.00
-                )
-            ),
-            "expenses" -> Json.arr()
-            )
-
-            val createRequest =
-            FakeRequest(
-                POST,
-                "/api/v1/quarterly-updates"
-            ).withJsonBody(createBody)
-
-            val createResult = route(app, createRequest).get
+            val createResult = 
+                route(
+                    app,
+                    createQuarterlyUpdateRequest(
+                        validQuarterlyUpdateJson(
+                            expenses = Json.arr()
+                        )
+                    )
+                ).get
 
             status(createResult) mustBe CREATED
 
-            val id =
-            (contentAsJson(createResult) \ "id").as[String]
+            val id = 
+                (contentAsJson(createResult) \ "id").as[String]
 
-            val retrieveRequest =
-            FakeRequest(
-                GET,
-                s"/api/v1/quarterly-updates/$id"
-            )
-
-            val retrieveResult =
-            route(app, retrieveRequest).get
+            val retrieveResult = 
+                route(
+                    app,
+                    retrieveQuarterlyUpdateRequest(id)
+                ).get
 
             status(retrieveResult) mustBe OK
         }
 
         "return 404 Not Found when the quarterly update does not exist" in {
-            val request =
-                FakeRequest(
-                GET,
-                "/api/v1/quarterly-updates/missing-id"
-                )
-
-            val result = route(app, request).get
+            val result =
+                route(
+                    app,
+                    retrieveQuarterlyUpdateRequest("missing-id")
+                ).get
 
             status(result) mustBe NOT_FOUND
 
@@ -222,56 +157,36 @@ class QuarterlyUpdateControllerSpec
     "POST /api/v1/quarterly-updates/:id/submit" should {
 
         "return 200 OK when submitting an existing valid draft" in {
-            val createBody = Json.obj(
-            "taxpayerReference" -> "TAX-12345678",
-            "taxYear" -> Json.obj(
-                "startYear" -> 2026,
-                "endYear" -> 2027
-            ),
-            "quarter" -> "Q1",
-            "income" -> Json.arr(
-                Json.obj(
-                "category" -> "SelfEmployment",
-                "amount" -> 1500.00
-                )
-            ),
-            "expenses" -> Json.arr()
-            )
-
-            val createRequest =
-            FakeRequest(
-                POST,
-                "/api/v1/quarterly-updates"
-            ).withJsonBody(createBody)
-
-            val createResult =
-            route(app, createRequest).get
+            val createResult = 
+                route(
+                    app,
+                    createQuarterlyUpdateRequest(
+                        validQuarterlyUpdateJson(
+                            expenses = Json.arr()
+                        )
+                    )
+                ).get
 
             status(createResult) mustBe CREATED
 
             val id =
-            (contentAsJson(createResult) \ "id").as[String]
-
-            val submitRequest =
-            FakeRequest(
-                POST,
-                s"/api/v1/quarterly-updates/$id/submit"
-            )
+                (contentAsJson(createResult) \ "id").as[String]
 
             val submitResult =
-            route(app, submitRequest).get
+                route(
+                    app,
+                    submitQuarterlyUpdateRequest(id)
+                ).get
 
             status(submitResult) mustBe OK
         }
 
         "return 404 Not Found when submitting a missing quarterly update" in {
-            val request =
-                FakeRequest(
-                POST,
-                "/api/v1/quarterly-updates/missing-id/submit"
-                )
-
-            val result = route(app, request).get
+            val result =
+                route(
+                    app,
+                    submitQuarterlyUpdateRequest("missing-id")
+                ).get
 
             status(result) mustBe NOT_FOUND
         }
@@ -312,10 +227,7 @@ class QuarterlyUpdateControllerSpec
                 )(using ExecutionContext.global)
 
             val request =
-                FakeRequest(
-                    POST,
-                    s"/api/v1/quarterly-updates/${invalidDraft.id}/submit"
-                )
+                submitQuarterlyUpdateRequest(invalidDraft.id)
 
             val result =
                 controller.submit(invalidDraft.id)(request)
@@ -324,30 +236,15 @@ class QuarterlyUpdateControllerSpec
         }
 
         "return 409 Conflict when submitting an already submitted update" in {
-            val createBody = Json.obj(
-                "taxpayerReference" -> "TAX-12345678",
-                "taxYear" -> Json.obj(
-                    "startYear" -> 2026,
-                    "endYear" -> 2027
-                ),
-                "quarter" -> "Q1",
-                "income" -> Json.arr(
-                    Json.obj(
-                        "category" -> "SelfEmployment",
-                        "amount" -> 1500.00
-                    )
-                ),
-                "expenses" -> Json.arr()
-            )
-
-            val createRequest =
-                FakeRequest(
-                    POST,
-                    "/api/v1/quarterly-updates"
-                ).withJsonBody(createBody)
-
             val createResult =
-                route(app, createRequest).get
+                route(
+                    app,
+                    createQuarterlyUpdateRequest(
+                        validQuarterlyUpdateJson(
+                            expenses = Json.arr()
+                        )
+                    )
+                ).get
 
             status(createResult) mustBe CREATED
 
@@ -357,10 +254,7 @@ class QuarterlyUpdateControllerSpec
             val firstSubmission =
                 route(
                     app,
-                    FakeRequest(
-                        POST,
-                        s"/api/v1/quarterly-updates/$id/submit"
-                    )
+                    submitQuarterlyUpdateRequest(id)
                 ).get
 
             status(firstSubmission) mustBe OK
@@ -368,10 +262,7 @@ class QuarterlyUpdateControllerSpec
             val secondSubmission =
                 route(
                     app,
-                    FakeRequest(
-                        POST,
-                        s"/api/v1/quarterly-updates/$id/submit"
-                    )
+                    submitQuarterlyUpdateRequest(id)
                 ).get
 
             status(secondSubmission) mustBe CONFLICT
