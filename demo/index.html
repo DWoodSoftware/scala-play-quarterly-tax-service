@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Quarterly Tax Service — Interactive Demo</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Scala 3 · Play Framework</p>
+
+      <h1>Quarterly Tax Service</h1>
+
+      <p>
+        Interactive demonstration of the quarterly reporting
+        API workflow.
+      </p>
+    </header>
+
+    <section aria-labelledby="create-heading">
+      <h2 id="create-heading">Create quarterly update</h2>
+
+      <form id="create-update-form">
+        <label>
+            Taxpayer reference
+            <input
+            id="taxpayer-reference"
+            name="taxpayerReference"
+            type="text"
+            value="TAX-12345678"
+            required
+            />
+        </label>
+
+        <fieldset>
+            <legend>Tax year</legend>
+
+            <label>
+            Start year
+            <input
+                id="tax-year-start"
+                name="taxYearStart"
+                type="number"
+                value="2026"
+                required
+            />
+            </label>
+
+            <label>
+            End year
+            <input
+                id="tax-year-end"
+                name="taxYearEnd"
+                type="number"
+                value="2027"
+                required
+            />
+            </label>
+        </fieldset>
+
+        <label>
+            Quarter
+            <select id="quarter" name="quarter">
+            <option value="Q1">Q1</option>
+            <option value="Q2">Q2</option>
+            <option value="Q3">Q3</option>
+            <option value="Q4">Q4</option>
+            </select>
+        </label>
+
+        <fieldset>
+            <legend>Income</legend>
+
+            <label>
+            Category
+            <select id="income-category" name="incomeCategory">
+                <option value="SelfEmployment">Self employment</option>
+                <option value="Dividends">Dividends</option>
+                <option value="Other">Other</option>
+            </select>
+            </label>
+
+            <label>
+            Amount
+            <input
+                id="income-amount"
+                name="incomeAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                value="1500.00"
+                required
+            />
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Expenses</legend>
+
+            <label>
+            Category
+            <select id="expense-category" name="expenseCategory">
+                <option value="OfficeCosts">Office costs</option>
+                <option value="Travel">Travel</option>
+                <option value="Other">Other</option>
+            </select>
+            </label>
+
+            <label>
+            Amount
+            <input
+                id="expense-amount"
+                name="expenseAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                value="250.00"
+                required
+            />
+            </label>
+        </fieldset>
+
+        <button type="submit">
+            Create update
+        </button>
+        </form>
+    </section>
+
+    <section aria-labelledby="current-heading">
+        <h2 id="current-heading">Current update</h2>
+
+        <div id="current-update-empty">
+            <p>No update loaded.</p>
+        </div>
+
+        <dl id="current-update-details" hidden>
+            <dt>Identifier</dt>
+            <dd id="current-update-id"></dd>
+
+            <dt>Status</dt>
+            <dd id="current-update-status"></dd>
+
+            <dt>Total income</dt>
+            <dd id="current-update-income"></dd>
+
+            <dt>Total expenses</dt>
+            <dd id="current-update-expenses"></dd>
+
+            <dt>Net amount</dt>
+            <dd id="current-update-net"></dd>
+        </dl>
+    </section>
+
+    <section aria-labelledby="retrieve-heading">
+      <h2 id="retrieve-heading">Retrieve existing update</h2>
+
+      <p>
+        Retrieval controls coming next.
+      </p>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
