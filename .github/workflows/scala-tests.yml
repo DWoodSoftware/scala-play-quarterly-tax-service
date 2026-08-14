@@ -1,4 +1,4 @@
-name: Scala Tests
+name: Scala CI
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,11 +21,17 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
           cache: sbt
 
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
+
+      - name: Check formatting
+        run: sbt scalafmtCheckAll
+
+      - name: Compile
+        run: sbt compile
 
       - name: Run tests
         run: sbt test
