@@ -36,10 +36,9 @@ class SubmissionStatusSpec extends AnyWordSpec with Matchers {
       SubmissionStatus.Submitted.canTransitionTo(SubmissionStatus.Draft) shouldBe false
     }
 
-    "prevent transitioning to the current state" in {
+    "prevent transitioning to the current state" in
       SubmissionStatus.values.foreach { status =>
         status.canTransitionTo(status) shouldBe false
       }
-    }
   }
 }

@@ -7,35 +7,35 @@ import play.api.test.Helpers.*
 object HttpFixtures {
 
   def validQuarterlyUpdateJson(
-      income: JsArray = Json.arr(
-        Json.obj(
-          "category" -> "SelfEmployment",
-          "amount" -> 1500.00
-        )
-      ),
-      expenses: JsArray = Json.arr(
-        Json.obj(
-          "category" -> "OfficeCosts",
-          "amount" -> 250.00
-        )
+    income: JsArray = Json.arr(
+      Json.obj(
+        "category" -> "SelfEmployment",
+        "amount"   -> 1500.00
       )
+    ),
+    expenses: JsArray = Json.arr(
+      Json.obj(
+        "category" -> "OfficeCosts",
+        "amount"   -> 250.00
+      )
+    )
   ): JsObject =
     Json.obj(
       "taxpayerReference" -> "TAX-12345678",
-      "taxYear" -> Json.obj(
+      "taxYear"           -> Json.obj(
         "startYear" -> 2026,
-        "endYear" -> 2027
+        "endYear"   -> 2027
       ),
-      "quarter" -> "Q1",
-      "income" -> income,
-      "expenses" -> expenses
+      "quarter"           -> "Q1",
+      "income"            -> income,
+      "expenses"          -> expenses
     )
-    
+
     // Intentionally no generic "invalid" fixture:
     // validity belongs to the domain rules under test.
 
   def createQuarterlyUpdateRequest(
-      body: JsObject = validQuarterlyUpdateJson()
+    body: JsObject = validQuarterlyUpdateJson()
   ) =
     FakeRequest(
       POST,
@@ -43,7 +43,7 @@ object HttpFixtures {
     ).withJsonBody(body)
 
   def retrieveQuarterlyUpdateRequest(
-      id: String
+    id: String
   ) =
     FakeRequest(
       GET,
@@ -51,7 +51,7 @@ object HttpFixtures {
     )
 
   def submitQuarterlyUpdateRequest(
-      id: String
+    id: String
   ) =
     FakeRequest(
       POST,

@@ -8,32 +8,28 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.*
-import play.api.test.{Injecting}
+import play.api.test.Injecting
 import repositories.QuarterlyUpdateRepository
 
 import support.HttpFixtures.*
 
 import scala.concurrent.Future
 
-class QuarterlyUpdateLifecycleSpec
-    extends PlaySpec
-    with GuiceOneAppPerTest
-    with Injecting {
+class QuarterlyUpdateLifecycleSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
 
-  final class RecordingQuarterlyUpdateRepository
-      extends QuarterlyUpdateRepository {
+  final class RecordingQuarterlyUpdateRepository extends QuarterlyUpdateRepository {
 
     var saveCalled: Boolean = false
 
     override def save(
-        update: QuarterlyUpdate
+      update: QuarterlyUpdate
     ): Future[QuarterlyUpdate] = {
       saveCalled = true
       Future.successful(update)
     }
 
     override def findById(
-        id: String
+      id: String
     ): Future[Option[QuarterlyUpdate]] =
       Future.successful(None)
   }
@@ -76,33 +72,33 @@ class QuarterlyUpdateLifecycleSpec
     }
 
     "create and then submit a quarterly update" in {
-        val requestBody = validQuarterlyUpdateJson(expenses = Json.arr())
+      val requestBody = validQuarterlyUpdateJson(expenses = Json.arr())
 
-        val createResult =
-            route(
-            app,
-            createQuarterlyUpdateRequest(requestBody)
-            ).get
+      val createResult =
+        route(
+          app,
+          createQuarterlyUpdateRequest(requestBody)
+        ).get
 
-        status(createResult) mustBe CREATED
+      status(createResult) mustBe CREATED
 
-        val id =
-            (contentAsJson(createResult) \ "id").as[String]
+      val id =
+        (contentAsJson(createResult) \ "id").as[String]
 
-        val submitResult =
-            route(
-            app,
-            submitQuarterlyUpdateRequest(id)
-            ).get
+      val submitResult =
+        route(
+          app,
+          submitQuarterlyUpdateRequest(id)
+        ).get
 
-        status(submitResult) mustBe OK
+      status(submitResult) mustBe OK
 
-        val submitted =
-            contentAsJson(submitResult)
+      val submitted =
+        contentAsJson(submitResult)
 
-        (submitted \ "id").as[String] mustBe id
-        (submitted \ "status").as[String] mustBe "Submitted"
-        (submitted \ "submittedAt").asOpt[String] mustBe defined
+      (submitted \ "id").as[String] mustBe id
+      (submitted \ "status").as[String] mustBe "Submitted"
+      (submitted \ "submittedAt").asOpt[String] mustBe defined
     }
 
     "reject duplicate submission without changing the submitted update" in {
@@ -158,10 +154,10 @@ class QuarterlyUpdateLifecycleSpec
           )
           .build()
 
-      val requestBody = 
+      val requestBody =
         validQuarterlyUpdateJson(
-            income = Json.arr(),
-            expenses = Json.arr()
+          income = Json.arr(),
+          expenses = Json.arr()
         )
 
       val result =
@@ -177,26 +173,26 @@ class QuarterlyUpdateLifecycleSpec
     "calculate derived financial values server-side" in {
       val requestBody =
         validQuarterlyUpdateJson(
-            income = Json.arr(
+          income = Json.arr(
             Json.obj(
-                "category" -> "SelfEmployment",
-                "amount" -> 2000.00
+              "category" -> "SelfEmployment",
+              "amount"   -> 2000.00
             ),
             Json.obj(
-                "category" -> "Other",
-                "amount" -> 500.00
+              "category" -> "Other",
+              "amount"   -> 500.00
             )
-            ),
-            expenses = Json.arr(
+          ),
+          expenses = Json.arr(
             Json.obj(
-                "category" -> "OfficeCosts",
-                "amount" -> 300.00
+              "category" -> "OfficeCosts",
+              "amount"   -> 300.00
             )
-            )
+          )
         ) ++ Json.obj(
-            "totalIncome" -> 999999.00,
-            "totalExpenses" -> 999999.00,
-            "netAmount" -> 999999.00
+          "totalIncome"   -> 999999.00,
+          "totalExpenses" -> 999999.00,
+          "netAmount"     -> 999999.00
         )
 
       val createResult =

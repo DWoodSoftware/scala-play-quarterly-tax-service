@@ -11,21 +11,21 @@ class QuarterlyUpdateRepositorySpec extends AnyWordSpec with Matchers {
   "QuarterlyUpdateRepository" should {
 
     "define an asynchronous save and lookup contract" in {
-        class TestRepository extends QuarterlyUpdateRepository {
+      class TestRepository extends QuarterlyUpdateRepository {
 
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] =
-                Future.successful(update)
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] =
+          Future.successful(update)
 
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(None)
-        }
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(None)
+      }
 
-        val repository = new TestRepository
-        repository shouldBe a[QuarterlyUpdateRepository]
+      val repository = new TestRepository
+      repository shouldBe a[QuarterlyUpdateRepository]
     }
   }
 }

@@ -14,225 +14,225 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
   "QuarterlyUpdateService.submit" should {
 
     "submit a valid draft quarterly update" in {
-        val draft = 
-            QuarterlyUpdate.create(validQuarterlyUpdateInput())
+      val draft =
+        QuarterlyUpdate.create(validQuarterlyUpdateInput())
 
-        var persisted: Option[QuarterlyUpdate] = None
+      var persisted: Option[QuarterlyUpdate] = None
 
-        val repository = new QuarterlyUpdateRepository {
+      val repository = new QuarterlyUpdateRepository {
 
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] = {
-                persisted = Some(update)
-                Future.successful(update)
-            }
-
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(Some(draft))
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] = {
+          persisted = Some(update)
+          Future.successful(update)
         }
 
-        val service = 
-            new QuarterlyUpdateService(
-                repository, 
-                executionContext
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(Some(draft))
+      }
+
+      val service =
+        new QuarterlyUpdateService(
+          repository,
+          executionContext
+        )
+
+      service.submit(draft.id).map { result =>
+        result match {
+          case Right(submitted) =>
+            submitted.status shouldBe SubmissionStatus.Submitted
+            submitted.submittedAt shouldBe defined
+            persisted shouldBe Some(submitted)
+
+          case Left(error) =>
+            fail(
+              s"Expected successful submission, got: $error "
             )
-
-        service.submit(draft.id).map { result =>
-            result match {
-                case Right(submitted) =>
-                    submitted.status shouldBe SubmissionStatus.Submitted
-                    submitted.submittedAt shouldBe defined
-                    persisted shouldBe Some(submitted)
-
-                case Left(error) =>
-                    fail(
-                        s"Expected successful submission, got: $error "
-                    )
-            }
         }
+      }
     }
 
     "return UpdateNotFound when submitting a missing quarterly update" in {
-        val repository = new QuarterlyUpdateRepository {
+      val repository = new QuarterlyUpdateRepository {
 
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] =
-                Future.successful(update)
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] =
+          Future.successful(update)
 
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(None)
-        }
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(None)
+      }
 
-        val service = 
-            new QuarterlyUpdateService(
-                repository, 
-                executionContext
-            )
+      val service =
+        new QuarterlyUpdateService(
+          repository,
+          executionContext
+        )
 
-        service.submit("missing-id").map { result =>
-            result shouldBe Left(
-                DomainError.UpdateNotFound("missing-id")
-            )
-        }
+      service.submit("missing-id").map { result =>
+        result shouldBe Left(
+          DomainError.UpdateNotFound("missing-id")
+        )
+      }
     }
 
     "return a validation failure when submitting an invalid draft" in {
-        val invalidInput =
+      val invalidInput =
         validQuarterlyUpdateInput()
-            .copy(income = List.empty)
+          .copy(income = List.empty)
 
-        val invalidDraft = 
-            QuarterlyUpdate.create(invalidInput)
+      val invalidDraft =
+        QuarterlyUpdate.create(invalidInput)
 
-        var saveCalled = false
+      var saveCalled = false
 
-        val repository = new QuarterlyUpdateRepository {
+      val repository = new QuarterlyUpdateRepository {
 
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] = {
-                saveCalled = true
-                Future.successful(update)
-            }
-
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(Some(invalidDraft))
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] = {
+          saveCalled = true
+          Future.successful(update)
         }
 
-        val service = 
-            new QuarterlyUpdateService(
-                repository, 
-                executionContext
-            )
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(Some(invalidDraft))
+      }
 
-        service.submit(invalidDraft.id).map { result =>
-            result shouldBe Left(
-                DomainError.ValidationFailed(
-                    List(ValidationError.MissingIncome)
-                )
-            )
+      val service =
+        new QuarterlyUpdateService(
+          repository,
+          executionContext
+        )
 
-            saveCalled shouldBe false
-        }
+      service.submit(invalidDraft.id).map { result =>
+        result shouldBe Left(
+          DomainError.ValidationFailed(
+            List(ValidationError.MissingIncome)
+          )
+        )
+
+        saveCalled shouldBe false
+      }
     }
 
     "reject an already submitted quarterly update" in {
-        val draft = 
-            QuarterlyUpdate.create(validQuarterlyUpdateInput())
+      val draft =
+        QuarterlyUpdate.create(validQuarterlyUpdateInput())
 
-        val submitted =
-            draft
-                .transitionTo(SubmissionStatus.Validated)
-                .flatMap(
-                    _.markSubmitted(java.time.Instant.now())
-                ) match {
-                case Right(value) => 
-                    value
+      val submitted =
+        draft
+          .transitionTo(SubmissionStatus.Validated)
+          .flatMap(
+            _.markSubmitted(java.time.Instant.now())
+          ) match {
+          case Right(value) =>
+            value
 
-                case Left(error) => 
-                    fail(
-                        s"Failed to prepare submitted fixture: $error"
-                    )
-            }
-
-        var saveCalled = false
-
-        val repository = new QuarterlyUpdateRepository {
-            
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] = {
-                saveCalled = true
-                Future.successful(update)
-            }
-
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(Some(submitted))
+          case Left(error) =>
+            fail(
+              s"Failed to prepare submitted fixture: $error"
+            )
         }
 
-        val service = 
-            new QuarterlyUpdateService(
-                repository, 
-                executionContext
-            )
+      var saveCalled = false
 
-        service.submit(submitted.id).map { result =>
-            result shouldBe Left(
-                DomainError.InvalidStateTransition(
-                    current = SubmissionStatus.Submitted,
-                    requested = SubmissionStatus.Validated
-                )
-            )
-            
-            saveCalled shouldBe false
+      val repository = new QuarterlyUpdateRepository {
+
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] = {
+          saveCalled = true
+          Future.successful(update)
         }
+
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(Some(submitted))
+      }
+
+      val service =
+        new QuarterlyUpdateService(
+          repository,
+          executionContext
+        )
+
+      service.submit(submitted.id).map { result =>
+        result shouldBe Left(
+          DomainError.InvalidStateTransition(
+            current = SubmissionStatus.Submitted,
+            requested = SubmissionStatus.Validated
+          )
+        )
+
+        saveCalled shouldBe false
+      }
     }
   }
 
   "QuarterlyUpdateService.findById" should {
-    
+
     "return an existing quarterly update" in {
-        val update = QuarterlyUpdate.create(validQuarterlyUpdateInput())
+      val update = QuarterlyUpdate.create(validQuarterlyUpdateInput())
 
-        val repository = new QuarterlyUpdateRepository {
-            
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] =
-                Future.successful(update)
+      val repository = new QuarterlyUpdateRepository {
 
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(Some(update))
-        }
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] =
+          Future.successful(update)
 
-        val service = 
-            new QuarterlyUpdateService(
-                repository, 
-                executionContext
-            )
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(Some(update))
+      }
 
-        service.findById(update.id).map { result =>
-            result shouldBe Right(update)
-        }
+      val service =
+        new QuarterlyUpdateService(
+          repository,
+          executionContext
+        )
+
+      service.findById(update.id).map { result =>
+        result shouldBe Right(update)
+      }
     }
 
     "return UpdateNotFound when the quarterly update does not exist" in {
-        val repository = new QuarterlyUpdateRepository {
+      val repository = new QuarterlyUpdateRepository {
 
-            override def save(
-                update: QuarterlyUpdate
-            ): Future[QuarterlyUpdate] =
-                Future.successful(update)
+        override def save(
+          update: QuarterlyUpdate
+        ): Future[QuarterlyUpdate] =
+          Future.successful(update)
 
-            override def findById(
-                id: String
-            ): Future[Option[QuarterlyUpdate]] =
-                Future.successful(None)
-        }
+        override def findById(
+          id: String
+        ): Future[Option[QuarterlyUpdate]] =
+          Future.successful(None)
+      }
 
-        val service = 
-            new QuarterlyUpdateService(
-                repository, 
-                executionContext
-            )
+      val service =
+        new QuarterlyUpdateService(
+          repository,
+          executionContext
+        )
 
-        service.findById("missing-id").map { result =>
-            result shouldBe Left(
-                DomainError.UpdateNotFound("missing-id")
-            )
-        }
+      service.findById("missing-id").map { result =>
+        result shouldBe Left(
+          DomainError.UpdateNotFound("missing-id")
+        )
+      }
     }
   }
 
@@ -244,25 +244,25 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
       val repository = new QuarterlyUpdateRepository {
 
         override def save(
-            update: QuarterlyUpdate
+          update: QuarterlyUpdate
         ): Future[QuarterlyUpdate] = {
           persisted = Some(update)
           Future.successful(update)
         }
 
         override def findById(
-            id: String
+          id: String
         ): Future[Option[QuarterlyUpdate]] =
           Future.successful(None)
       }
 
-      val service = 
+      val service =
         new QuarterlyUpdateService(
-            repository, 
-            executionContext
+          repository,
+          executionContext
         )
 
-      val input = 
+      val input =
         validQuarterlyUpdateInput()
 
       service.create(input).map { result =>
@@ -273,7 +273,7 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
 
           case Left(error) =>
             fail(
-                s"Expected successful creation, got: $error"
+              s"Expected successful creation, got: $error"
             )
         }
       }
@@ -285,27 +285,27 @@ class QuarterlyUpdateServiceSpec extends AsyncWordSpec with Matchers {
       val repository = new QuarterlyUpdateRepository {
 
         override def save(
-            update: QuarterlyUpdate
+          update: QuarterlyUpdate
         ): Future[QuarterlyUpdate] = {
           saveCalled = true
           Future.successful(update)
         }
 
         override def findById(
-            id: String
+          id: String
         ): Future[Option[QuarterlyUpdate]] =
           Future.successful(None)
       }
 
-      val service = 
+      val service =
         new QuarterlyUpdateService(
-            repository, 
-            executionContext
+          repository,
+          executionContext
         )
 
       val input =
         validQuarterlyUpdateInput()
-            .copy(income = List.empty)
+          .copy(income = List.empty)
 
       service.create(input).map { result =>
         result shouldBe Left(

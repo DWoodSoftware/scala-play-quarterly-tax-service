@@ -663,7 +663,7 @@ Relevant flow:
 
 # Phase 12 — CI
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -671,12 +671,12 @@ Ensure every change is automatically verified.
 
 Tasks:
 
-* [ ] Add GitHub Actions workflow
-* [ ] Run formatting checks
-* [ ] Run compilation
-* [ ] Run complete test suite
-* [ ] Fail CI on any verification failure
-* [ ] Add CI status badge to README when stable
+* [x] Add GitHub Actions workflow
+* [x] Run formatting checks
+* [x] Run compilation
+* [x] Run complete test suite
+* [x] Fail CI on any verification failure
+* [x] Add CI status badge to README when stable
 
 Target checks:
 
