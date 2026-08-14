@@ -744,6 +744,13 @@ The initial project deliberately excludes:
 * Kubernetes
 * actual UK tax-liability calculations
 * production financial processing
+  
+## Future Refactoring — Test Infrastructure
+
+- [ ] Review repository test doubles for shared abstractions
+- [ ] Review test application builders
+- [ ] Remove remaining low-value duplication
+- [ ] Resolve duplicate scalac flag warnings
 
 These may only be introduced if they materially improve the project's technical value.
 
