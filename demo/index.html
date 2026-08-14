@@ -25,6 +25,17 @@
       </p>
     </header>
 
+    <section
+        id="error-panel"
+        role="alert"
+        aria-live="polite"
+        hidden
+    >
+        <h2 id="error-title">Request failed</h2>
+        <p id="error-message"></p>
+        <ul id="error-details"></ul>
+    </section>
+
     <section aria-labelledby="create-heading">
       <h2 id="create-heading">Create quarterly update</h2>
 
@@ -157,14 +168,34 @@
             <dt>Net amount</dt>
             <dd id="current-update-net"></dd>
         </dl>
+        <button
+            id="submit-current-update"
+            type="button"
+            hidden
+            >
+            Submit update
+        </button>
     </section>
 
     <section aria-labelledby="retrieve-heading">
-      <h2 id="retrieve-heading">Retrieve existing update</h2>
+        <h2 id="retrieve-heading">Retrieve existing update</h2>
 
-      <p>
-        Retrieval controls coming next.
-      </p>
+        <form id="retrieve-update-form">
+            <label>
+            Update identifier
+            <input
+                id="retrieve-update-id"
+                name="updateId"
+                type="text"
+                placeholder="Enter update ID"
+                required
+            />
+            </label>
+
+            <button type="submit">
+            Retrieve update
+            </button>
+        </form>
     </section>
   </main>
 
