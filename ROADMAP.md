@@ -663,7 +663,7 @@ Relevant flow:
 
 # Phase 12 — CI
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -676,7 +676,7 @@ Tasks:
 * [x] Run compilation
 * [x] Run complete test suite
 * [x] Fail CI on any verification failure
-* [ ] Add CI status badge to README when stable
+* [x] Add CI status badge to README when stable
 
 Target checks:
 
