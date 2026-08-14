@@ -708,7 +708,7 @@ Tasks:
 
 # Phase 14 — Lightweight Demonstration UI
 
-**Status:** [ ] Planned
+**Status:** [x] Complete
 
 Purpose:
 
@@ -717,16 +717,16 @@ implemented Scala/Play quarterly reporting workflow.
 
 Tasks:
 
-* [ ] Add lightweight frontend entry point
-* [ ] Add quarterly update creation form
-* [ ] Display server-derived financial totals
-* [ ] Display generated update identifier and lifecycle state
-* [ ] Support retrieval of an existing update
-* [ ] Support submission of a draft update
-* [ ] Surface API validation/error responses clearly
-* [ ] Keep authentication explicitly out of scope
-* [ ] Avoid duplicating business rules in the frontend
-* [ ] Verify create → retrieve → submit through the UI
+* [x] Add lightweight frontend entry point
+* [x] Add quarterly update creation form
+* [x] Display server-derived financial totals
+* [x] Display generated update identifier and lifecycle state
+* [x] Support retrieval of an existing update
+* [x] Support submission of a draft update
+* [x] Surface API validation/error responses clearly
+* [x] Keep authentication explicitly out of scope
+* [x] Avoid duplicating business rules in the frontend
+* [x] Verify create → retrieve → submit through the UI
 
 ---
 

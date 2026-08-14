@@ -8,15 +8,6 @@ A Scala 3 and Play Framework portfolio project for a fictional quarterly tax rep
 
 This project demonstrates a production-style backend architecture in Scala with Play Framework. It focuses on clear separation of concerns, immutable domain modelling, test-driven development, and a simple layered structure that can grow into a fuller service over time.
 
-## What is implemented right now
-
-The current implementation includes:
-
-- A minimal Play application bootstrap
-- A health endpoint at GET /health returning JSON with the status UP
-- A test-first controller spec covering the health endpoint behaviour
-- Basic project tooling for formatting, testing, and local development
-
 ## Architecture at a glance
 
 The application currently follows a thin MVC-style structure:
@@ -32,6 +23,19 @@ The application currently follows a thin MVC-style structure:
 - sbt
 - ScalaTest
 - scalafmt
+- Docker 
+
+## Live demo
+
+The interactive demo is available through GitHub Pages:
+
+- Frontend: https://dwoodsoftware.github.io/scala-play-quarterly-tax-service/
+- Backend API: https://scala-play-quarterly-tax-service.onrender.com
+- Health check: https://scala-play-quarterly-tax-service.onrender.com/health
+
+The demo supports the complete create → retrieve → submit quarterly update lifecycle against the deployed Scala/Play backend.
+
+> The backend uses Render's free tier and may require a short cold start after a period of inactivity.
 
 ## Running locally
 
